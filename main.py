@@ -4,7 +4,7 @@ import tornado.ioloop
 import tornado.web
 import time
 import json
-# import redis
+import redis
 # import random
 # import datetime
 # from operator import attrgetter, itemgetter
@@ -13,13 +13,18 @@ import json
 # https://www.hostwinds.com/vps/linux
 
 class DefaultHandler(tornado.web.RequestHandler):
+    def initialize(self, db):
+        self.db = db
     def get(self, path=""):
-        self.write(dict(asdf="Ok"))
+        self.db.set("test", "pol")
+        val = self.db.get("test").decode("utf-8")
+        self.write(dict(asdf=val))
 
 def main():
+    db = redis.from_url(os.environ.get("REDIS_URL"))
     settings = dict(template_path="html", static_path="static", debug=True)
     app = tornado.web.Application([
-        (r"/(.*)", DefaultHandler),
+        (r"/(.*)", DefaultHandler, dict(db=db)),
         (r'/favicon.ico', tornado.web.StaticFileHandler),
         (r'/static/', tornado.web.StaticFileHandler),
     ], **settings)
