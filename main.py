@@ -1,13 +1,7 @@
 import os
-# import tornado.httpserver
 import tornado.ioloop
 import tornado.web
-import time
-import json
 import redis
-# import random
-# import datetime
-# from operator import attrgetter, itemgetter
 
 # https://www.a2hosting.com/web-hosting
 # https://www.hostwinds.com/vps/linux
@@ -16,9 +10,17 @@ class DefaultHandler(tornado.web.RequestHandler):
     def initialize(self, db):
         self.db = db
     def get(self, path=""):
-        self.db.set("test", "pol")
-        val = self.db.get("test").decode("utf-8")
-        self.write(dict(asdf=val))
+        temp = self.db.get("temperature")
+        if temp:
+            temp = temp.decode("utf-8")
+            self.write(dict(temperature=temp))
+        else:
+            self.write(dict(error="key temperature does not exist"))
+    def post(self, path=""):
+        temp = self.get_argument("temperature")
+        print(temp)
+        self.db.set("temperature", temp)
+        self.write(dict(status="ok"))
 
 def main():
     db = redis.from_url(os.environ.get("REDIS_URL"))
@@ -35,4 +37,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
