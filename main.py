@@ -3,6 +3,7 @@ import tornado.ioloop
 import tornado.web
 import redis
 import json
+import datetime
 
 # https://www.a2hosting.com/web-hosting
 # https://www.hostwinds.com/vps/linux
@@ -20,11 +21,11 @@ def pushMeasurement(db, temperature, tstamp):
     db.set(key, val)
 
 def getMeasurements(db):
-    result = {}
+    result = []
     for k in db.keys():
         valstr = db.get(k)
         temperature, tstamp = string2entry(valstr)
-        result[tstamp] = temperature
+        result.append((tstamp, temperature))
     return result
 
 class TestHandler(tornado.web.RequestHandler):
@@ -34,11 +35,41 @@ class TestHandler(tornado.web.RequestHandler):
         for k in self.db.keys():
             self.db.delete(k)
 
+class GraphHandler(tornado.web.RequestHandler):
+    def initialize(self, db):
+        self.db = db
+    def get(self):
+        self.render("index.html")
+
+def fakeData1():
+    return [
+        [0, 0],   [1, 10],  [2, 23],  [3, 17],  [4, 18],  [5, 9],
+        [6, 11],  [7, 27],  [8, 33],  [9, 40],  [10, 32], [11, 35],
+        [12, 30], [13, 40], [14, 42], [15, 47], [16, 44], [17, 48],
+        [18, 52], [19, 54], [20, 42], [21, 55], [22, 56], [23, 57],
+        [24, 60], [25, 50], [26, 52], [27, 51], [28, 49], [29, 53],
+        [30, 55]
+      ]
+def fakeData():
+    data = []
+    for k,v in json.loads(open("sample.data").read()).get("measurements").items():
+        v = float(v[-5:])
+        k = datetime.datetime.strptime(k, '%Y-%m-%d %H:%M:%S.%f').timestamp()
+        data.append([k,v])
+
+    data = sorted(data, key=lambda x: x[0])
+    # data = list(map(lambda x: [x[0], float(x[1])], data.items()))
+    return data
+
 class DefaultHandler(tornado.web.RequestHandler):
     def initialize(self, db):
         self.db = db
     def get(self, path=""):
         measurements = getMeasurements(self.db)
+        if not measurements:
+            measurements = fakeData()
+            print(measurements)
+
         self.write(dict(measurements=measurements))
     def post(self, path=""):
         data = json.loads(self.request.body)
@@ -51,8 +82,9 @@ def main():
     db = redis.from_url(os.environ.get("REDIS_URL"))
     settings = dict(template_path="html", static_path="static", debug=True)
     app = tornado.web.Application([
+        (r"/graph", GraphHandler, dict(db=db)),
         (r"/test", TestHandler, dict(db=db)),
-        (r"/(.*)", DefaultHandler, dict(db=db)),
+        (r"/data/?(.*)", DefaultHandler, dict(db=db)),
         
         (r'/favicon.ico', tornado.web.StaticFileHandler),
         (r'/static/', tornado.web.StaticFileHandler),

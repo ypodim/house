@@ -16,8 +16,8 @@ class Temperature:
   def post(self, string):
     now = "%s" % datetime.datetime.now()
     entry = dict(temperature=string, tstamp=now)
-    url = "http://pool.asdf0.com"
-    # url = "http://localhost:5000"
+    url = "http://pool.asdf0.com/data"
+    # url = "http://localhost:5000/data"
     headers = {'Content-Type': 'application/json'}
     h = httplib2.Http(".cache")
     (resp, content) = h.request(url, "POST", body=json.dumps(entry), headers=headers)

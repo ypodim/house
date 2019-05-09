@@ -1,0 +1,46 @@
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+
+$(document).ready(function(){
+  google.charts.load('current', {packages: ['corechart', 'line']});
+  google.charts.setOnLoadCallback(getData);
+});
+
+function getData() {
+  $.get("/data", function(data){
+    data = data.measurements;
+    dateData = [];
+    console.log(data.length);
+    for (i=0;i<data.length;i++) {
+      // var k = new Date(2019, 5, data[i][0]);
+      var k = new Date(data[i][0]*1000);
+      var v = data[i][1];
+      dateData.push([k, v]);
+    }
+    drawBasic(dateData);
+  })
+}
+
+function drawBasic(entries) {
+  var data = new google.visualization.DataTable();
+  data.addColumn('date', 'X');
+  data.addColumn('number', 'Dogs');
+
+  data.addRows(entries);
+
+  var options = {
+    hAxis: {
+      format: 'M/d/yy hh:mm',
+      title: 'Time'
+    },
+    vAxis: {
+      title: 'Popularity'
+    }
+  };
+  var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+  chart.draw(data, options);
+}
+</script>
+<div id="chart_div"></div>
+  
