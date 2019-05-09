@@ -11,9 +11,8 @@ function getData() {
   $.get("/data", function(data){
     data = data.measurements;
     dateData = [];
-    console.log(data.length);
+
     for (i=0;i<data.length;i++) {
-      // var k = new Date(2019, 5, data[i][0]);
       var k = new Date(data[i][0]*1000);
       var v = data[i][1];
       dateData.push([k, v]);
@@ -25,7 +24,7 @@ function getData() {
 function drawBasic(entries) {
   var data = new google.visualization.DataTable();
   data.addColumn('date', 'X');
-  data.addColumn('number', 'Dogs');
+  data.addColumn('number', 'Temperature');
 
   data.addRows(entries);
 
@@ -35,7 +34,7 @@ function drawBasic(entries) {
       title: 'Time'
     },
     vAxis: {
-      title: 'Popularity'
+      title: 'Temperature'
     }
   };
   var chart = new google.visualization.LineChart(document.getElementById('chart_div'));

@@ -51,15 +51,7 @@ def fakeData1():
         [30, 55]
       ]
 def fakeData():
-    data = []
-    for k,v in json.loads(open("sample.data").read()).get("measurements").items():
-        v = float(v[-5:])
-        k = datetime.datetime.strptime(k, '%Y-%m-%d %H:%M:%S.%f').timestamp()
-        data.append([k,v])
-
-    data = sorted(data, key=lambda x: x[0])
-    # data = list(map(lambda x: [x[0], float(x[1])], data.items()))
-    return data
+    return json.loads(open("sample.data").read()).get("measurements")
 
 class DefaultHandler(tornado.web.RequestHandler):
     def initialize(self, db):
@@ -68,8 +60,8 @@ class DefaultHandler(tornado.web.RequestHandler):
         measurements = getMeasurements(self.db)
         if not measurements:
             measurements = fakeData()
-            print(measurements)
-
+        measurements = list(map(lambda x: [datetime.datetime.strptime(x[0], '%Y-%m-%d %H:%M:%S.%f').timestamp(), float(x[1][-5:])], measurements))
+        measurements = sorted(measurements, key=lambda x: x[0])
         self.write(dict(measurements=measurements))
     def post(self, path=""):
         data = json.loads(self.request.body)
