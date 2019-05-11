@@ -41,19 +41,16 @@ class GraphHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("index.html")
 
-def fakeData1():
-    return [
-        [0, 0],   [1, 10],  [2, 23],  [3, 17],  [4, 18],  [5, 9],
-        [6, 11],  [7, 27],  [8, 33],  [9, 40],  [10, 32], [11, 35],
-        [12, 30], [13, 40], [14, 42], [15, 47], [16, 44], [17, 48],
-        [18, 52], [19, 54], [20, 42], [21, 55], [22, 56], [23, 57],
-        [24, 60], [25, 50], [26, 52], [27, 51], [28, 49], [29, 53],
-        [30, 55]
-      ]
 def fakeData():
     return json.loads(open("sample.data").read()).get("measurements")
 
 class DefaultHandler(tornado.web.RequestHandler):
+    def initialize(self, db):
+        self.db = db
+    def get(self, path=""):
+        self.write("ok")
+
+class DataHandler(tornado.web.RequestHandler):
     def initialize(self, db):
         self.db = db
     def get(self, path=""):
@@ -62,6 +59,7 @@ class DefaultHandler(tornado.web.RequestHandler):
             measurements = fakeData()
         measurements = list(map(lambda x: [datetime.datetime.strptime(x[0], '%Y-%m-%d %H:%M:%S.%f').timestamp(), float(x[1][-5:])], measurements))
         measurements = sorted(measurements, key=lambda x: x[0])
+        measurements = measurements[300:]
         self.write(dict(measurements=measurements))
     def post(self, path=""):
         data = json.loads(self.request.body)
@@ -76,7 +74,8 @@ def main():
     app = tornado.web.Application([
         (r"/graph", GraphHandler, dict(db=db)),
         (r"/test", TestHandler, dict(db=db)),
-        (r"/data/?(.*)", DefaultHandler, dict(db=db)),
+        (r"/data/?(.*)", DataHandler, dict(db=db)),
+        (r"/(.*)", DefaultHandler, dict(db=db)),
         
         (r'/favicon.ico', tornado.web.StaticFileHandler),
         (r'/static/', tornado.web.StaticFileHandler),
