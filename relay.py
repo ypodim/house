@@ -38,7 +38,8 @@ class Temperature:
     self.lastSave = time.time()
 
   def process(self, string):
-    print(string)
+    while not string[0].isdigit():
+      string = string[1:]
     if time.time() - self.lastSave > 300:
       self.post(string)
 
@@ -54,7 +55,6 @@ class Temperature:
             play()
           else:
             play(False)
-          
           self.process(string)
           string = ""
         else:
