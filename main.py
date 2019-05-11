@@ -58,7 +58,7 @@ class DataHandler(tornado.web.RequestHandler):
         if not measurements:
             measurements = fakeData()
         # measurements = list(filter(lambda x: x[1].isdigit(), measurements))
-        measurements = list(map(lambda x: [datetime.datetime.strptime(x[0], '%Y-%m-%d %H:%M:%S.%f').timestamp(), float(x[1][-6:])], measurements))
+        measurements = list(map(lambda x: [datetime.datetime.strptime(x[0], '%Y-%m-%d %H:%M:%S.%f').timestamp(), getNumber(x[1])], measurements))
         measurements = sorted(measurements, key=lambda x: x[0])
         measurements = measurements[-200:]
         self.write(dict(measurements=measurements))
@@ -68,6 +68,11 @@ class DataHandler(tornado.web.RequestHandler):
         tstamp = data.get("tstamp")
         pushMeasurement(self.db, temperature, tstamp)
         self.write(dict(status="ok"))
+
+def getNumber(string):
+    while not string[0].isdigit():
+        string = string[1:]
+    return float(string)
 
 def main():
     db = redis.from_url(os.environ.get("REDIS_URL"))
