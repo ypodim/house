@@ -24,13 +24,13 @@ function getData() {
 function drawBasic(entries) {
   var data = new google.visualization.DataTable();
   data.addColumn('date', 'X');
-  data.addColumn('number', 'Temperature');
+  data.addColumn('number', 'Y');
 
   data.addRows(entries);
 
   var options = {
     hAxis: {
-      format: 'M/d/yy hh:mm',
+      format: 'd hh:mm',
       title: 'Time'
     },
     vAxis: {
