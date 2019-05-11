@@ -59,7 +59,7 @@ class DataHandler(tornado.web.RequestHandler):
             measurements = fakeData()
         measurements = list(map(lambda x: [datetime.datetime.strptime(x[0], '%Y-%m-%d %H:%M:%S.%f').timestamp(), float(x[1][-5:])], measurements))
         measurements = sorted(measurements, key=lambda x: x[0])
-        measurements = measurements[280:]
+        measurements = measurements[200:]
         self.write(dict(measurements=measurements))
     def post(self, path=""):
         data = json.loads(self.request.body)
