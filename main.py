@@ -57,7 +57,7 @@ class DataHandler(tornado.web.RequestHandler):
         measurements = getMeasurements(self.db)
         if not measurements:
             measurements = fakeData()
-        measurements = list(map(lambda x: [datetime.datetime.strptime(x[0], '%Y-%m-%d %H:%M:%S.%f').timestamp(), float(x[1][-5:])], measurements))
+        measurements = list(map(lambda x: [datetime.datetime.strptime(x[0], '%Y-%m-%d %H:%M:%S.%f').timestamp(), float(x[1][-6:])], measurements))
         measurements = sorted(measurements, key=lambda x: x[0])
         measurements = measurements[-200:]
         self.write(dict(measurements=measurements))
