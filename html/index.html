@@ -5,6 +5,8 @@
 $(document).ready(function(){
   google.charts.load('current', {packages: ['corechart', 'line']});
   google.charts.setOnLoadCallback(getData);
+
+  $("#refresh").click(getData);
 });
 
 function getData() {
@@ -51,5 +53,6 @@ function drawBasic(entries) {
   #temp { display: inline-block; }
 </style>
 <label id="tstamp"></label><div id="temp">XX</div>
+<button id="refresh">refresh</button>
 <div id="chart_div"></div>
   
