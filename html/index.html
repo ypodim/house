@@ -18,6 +18,11 @@ function getData() {
       dateData.push([k, v]);
     }
     drawBasic(dateData);
+    var now = new Date();
+    var tstamp = dateData[dateData.length-1][0].getTime();
+    var diff = (now.getTime() - tstamp)/1000;
+    $("#tstamp").html(diff+" secs ago: ");
+    $("#temp").html(dateData[dateData.length-1][1]);
   })
 }
 
@@ -42,5 +47,9 @@ function drawBasic(entries) {
   chart.draw(data, options);
 }
 </script>
+<style>
+  #temp { display: inline-block; }
+</style>
+<label id="tstamp"></label><div id="temp">XX</div>
 <div id="chart_div"></div>
   
