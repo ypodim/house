@@ -14,8 +14,6 @@ class RFManager:
             with open("codes.json") as f:
                 self.codes = json.loads(f.read())
         result = self.codes[outletFamily][btn][value]
-        # if outletFamily not in self.status:
-        #     self.status[outletFamily] = {}
         self.status[outletFamily][btn] = value
         return result
     def getStatus(self):
