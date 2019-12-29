@@ -1,4 +1,5 @@
 import json
+from collections import defaultdict
 try:
     from rpi_rf import RFDevice
 except:
