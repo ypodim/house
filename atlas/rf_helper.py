@@ -7,11 +7,18 @@ except:
 class RFManager:
     def __init__(self):
         self.codes = None
+        self.status = defaultdict(dict)
     def getCode(self, outletFamily, btn, value):
         if self.codes == None:
             with open("codes.json") as f:
                 self.codes = json.loads(f.read())
-        return self.codes[outletFamily][btn][value]
+        result = self.codes[outletFamily][btn][value]
+        # if outletFamily not in self.status:
+        #     self.status[outletFamily] = {}
+        self.status[outletFamily][btn] = value
+        return result
+    def getStatus(self):
+        return self.status
     def tx(self, code, pin=17):
         rfdevice = RFDevice(pin)
         rfdevice.enable_tx()
