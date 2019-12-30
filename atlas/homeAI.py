@@ -14,7 +14,6 @@ class homeAI(threading.Thread):
         outletFamily = "0362"
         btn = "3"
         status = self.rf.getPlugStatus(outletFamily, btn)
-        self.log.info("light status is %s" % status)
 
         if status == "on":
             self.rf.txCode(outletFamily, btn, "off")
