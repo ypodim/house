@@ -1,4 +1,5 @@
 import json
+import logging
 from collections import defaultdict
 try:
     from rpi_rf import RFDevice
@@ -11,6 +12,7 @@ class RFManager:
         with open("codes.json") as f:
             self.codes = json.loads(f.read())
         self.status = defaultdict(dict)
+        logging.info("RFManager loaded %s code families" % len(self.codes))
     def getCode(self, outletFamily, btn, value):
         result = self.codes[outletFamily][btn][value]
         self.status[outletFamily][btn] = value
