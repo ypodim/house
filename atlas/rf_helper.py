@@ -8,11 +8,10 @@ except:
 class RFManager:
     def __init__(self):
         self.codes = None
+        with open("codes.json") as f:
+            self.codes = json.loads(f.read())
         self.status = defaultdict(dict)
     def getCode(self, outletFamily, btn, value):
-        if self.codes == None:
-            with open("codes.json") as f:
-                self.codes = json.loads(f.read())
         result = self.codes[outletFamily][btn][value]
         self.status[outletFamily][btn] = value
         return result
