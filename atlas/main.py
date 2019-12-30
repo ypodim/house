@@ -27,9 +27,8 @@ class RF433Handler(tornado.web.RequestHandler):
         if len(params) == 2:
             outletFamily = params[0]
             btn = params[1]
-            code = self.brain.rf.getCode(outletFamily, btn, val)
-            self.brain.rf.tx(code)
-            self.write(dict(status="ok", value=val))
+            result = self.brain.rf.txCode(outletFamily, btn, val)
+            self.write(dict(status="ok", result=result))
             return
         self.write(dict(status="error: expected 2 params, got %s" % len(params), value=val))
     def get(self):

@@ -13,22 +13,15 @@ class homeAI(threading.Thread):
     def looplights(self):
         outletFamily = "0362"
         btn = "3"
-        codeon = self.rf.getCode(outletFamily, btn, "on")
-        codeoff = self.rf.getCode(outletFamily, btn, "off")
-        
-        status = "off"
-        try:
-            status = self.rf.status[outletFamily][btn]
-        except:
-            pass
-
+        status = self.rf.getPlugStatus(outletFamily, btn)
         self.log.info("light status is %s" % status)
+
         if status == "on":
             self.log.info("turning lights off")
-            self.rf.tx(codeoff)
+            self.rf.txCode(outletFamily, btn, "off")
         else:
             self.log.info("turning lights on")
-            self.rf.tx(codeon)
+            self.rf.txCode(outletFamily, btn, "on")
 
     def run(self):
         while self.running:
