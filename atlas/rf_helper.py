@@ -1,4 +1,5 @@
 import json
+import sys
 import logging
 from collections import defaultdict
 try:
@@ -26,8 +27,12 @@ class Plug:
             rfdevice = RFDevice(pin)
             rfdevice.enable_tx()
             rfdevice.tx_repeat = 10
-            rfdevice.tx_code(code, 1, 187, 24)
-            rfdevice.cleanup()
+            try:
+                rfdevice.tx_code(code, 1, 187, 24)
+                rfdevice.cleanup()
+            except:
+                logging.error("unexpected error: %s" % sys.exc_info()[0])
+                return None
         self.status = plugstate
         return code
 

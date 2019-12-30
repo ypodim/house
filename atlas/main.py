@@ -16,6 +16,24 @@ class TemperatureHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("index.html")
 
+class SensorHandler(tornado.web.RequestHandler):
+    def initialize(self, brain):
+        self.brain = brain
+    # /sensors/light
+    def put(self):
+        params = self.request.path.split('/')[2:]
+        val = self.get_argument("value")
+        logging.info("Value:%s" % val)
+        if len(params) == 2:
+            outletFamily = params[0]
+            btn = params[1]
+            result = self.brain.rf.txCode(outletFamily, btn, val)
+            self.write(dict(status="ok", result=result))
+            return
+        self.write(dict(status="error: expected 2 params, got %s" % len(params), value=val))
+    def get(self):
+        self.write(dict(status=self.brain.sensors.getStatus()))
+
 class RF433Handler(tornado.web.RequestHandler):
     def initialize(self, brain):
         self.brain = brain
@@ -51,7 +69,8 @@ def main():
     settings = dict(template_path="html", static_path="static", debug=True)
     app = tornado.web.Application([
         (r"/temperature.*", TemperatureHandler),
-        (r"/rf433.*", RF433Handler, dict(brain=brain)), 
+        (r"/sensor/.*", SensorHandler, dict(brain=brain)),
+        (r"/rf433.*", RF433Handler, dict(brain=brain)),
         (r"/", DefaultHandler),
         
         (r'/favicon.ico', tornado.web.StaticFileHandler),
