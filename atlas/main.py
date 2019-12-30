@@ -1,7 +1,9 @@
 import tornado.ioloop
 import tornado.web
+import tornado.options
 import json
 import datetime
+import logging
 from rf_helper import RFManager
 
 class TemperatureHandler(tornado.web.RequestHandler):
@@ -35,6 +37,8 @@ class DefaultHandler(tornado.web.RequestHandler):
 
 
 def main():
+    tornado.options.parse_command_line()
+    logging.info("starting up")
     rf = RFManager()
     settings = dict(template_path="html", static_path="static", debug=True)
     app = tornado.web.Application([
