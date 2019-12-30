@@ -26,6 +26,5 @@ class homeAI(threading.Thread):
     def run(self):
         while self.running:
             self.looplights()
-            
-            time.sleep(3)
+            time.sleep(1)
         self.log.info("thread exiting")
