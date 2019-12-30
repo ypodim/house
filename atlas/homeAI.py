@@ -23,8 +23,10 @@ class homeAI(threading.Thread):
             pass
 
         if status == "on":
+            self.log.info("turning lights off")
             self.rf.tx(codeoff)
         else:
+            self.log.info("turning lights on")
             self.rf.tx(codeon)
 
     def run(self):
