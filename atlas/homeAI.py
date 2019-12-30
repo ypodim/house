@@ -19,12 +19,13 @@ class homeAI(threading.Thread):
         if status == "on":
             self.log.info("turning lights off")
             self.rf.txCode(outletFamily, btn, "off")
+            time.sleep(3)
         else:
             self.log.info("turning lights on")
             self.rf.txCode(outletFamily, btn, "on")
+            time.sleep(1)
 
     def run(self):
         while self.running:
             self.looplights()
-            time.sleep(1)
         self.log.info("thread exiting")
