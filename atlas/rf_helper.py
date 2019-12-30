@@ -4,7 +4,7 @@ from collections import defaultdict
 try:
     from rpi_rf import RFDevice
 except:
-    print("*** Error: must run on raspberry")
+    logging.error("must run on raspberry")
 
 class RFManager:
     def __init__(self):
