@@ -17,9 +17,9 @@ class homeAI(threading.Thread):
         status = self.rf.getPlugStatus(outletFamily, btn)
 
         new_status = "on"
-        sleep_multiplier = 1
+        sleep_multiplier = 5
         if status == "on":
-            sleep_multiplier = 3
+            sleep_multiplier = 5
             new_status = "off"
 
         self.rf.txCode(outletFamily, btn, new_status)
