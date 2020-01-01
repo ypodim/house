@@ -4,7 +4,9 @@ import urllib.request
 import json
 import ssl
 
-ssl._create_default_https_context = ssl._create_unverified_context
+import platform
+if platform.system() != "Linux"
+    ssl._create_default_https_context = ssl._create_unverified_context
 
 def getSunTime(event, data):
     sunset_str = data.get(event)
