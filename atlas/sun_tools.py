@@ -34,7 +34,7 @@ def getSunData():
     req = urllib.request.Request(url)
     req.add_header('x-rapidapi-key', key)
     content = urllib.request.urlopen(req).read()
-    data = json.loads(str(content))
+    data = json.loads(content.decode("ascii"))
     
     new_data = {}
     for i, entry in enumerate(data):
