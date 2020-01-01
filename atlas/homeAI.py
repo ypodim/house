@@ -28,7 +28,7 @@ class homeAI(threading.Thread):
         while sleep_time < 0.5:
             sleep_time = random.random() * sleep_multiplier
 
-        self.log.info("%s: sleeping for %s" % (new_status, sleep_time))
+        # self.log.info("%s: sleeping for %s" % (new_status, sleep_time))
         time.sleep(sleep_time)
 
     def run(self):
