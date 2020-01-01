@@ -5,7 +5,7 @@ import json
 import ssl
 
 import platform
-if platform.system() != "Linux"
+if platform.system() != "Linux":
     ssl._create_default_https_context = ssl._create_unverified_context
 
 def getSunTime(event, data):
