@@ -64,7 +64,6 @@ def main():
     access_log.info("starting up")
 
     brain = homeAI()
-    brain.start()
 
     settings = dict(template_path="html", static_path="static", debug=True)
     app = tornado.web.Application([
@@ -78,12 +77,14 @@ def main():
     ], **settings)
 
     try:
+        io_loop = tornado.ioloop.IOLoop.current()
+        io_loop.add_callback(brain.root)
+        pc = tornado.ioloop.PeriodicCallback(brain.periodic, 1000)
+        pc.start()
         app.listen(8888)
-        tornado.ioloop.IOLoop.current().start()
+        io_loop.start()
     except KeyboardInterrupt:
-        logging.info('stopping services...')
-        brain.running = 0
-        brain.join()    
+        logging.info('stopping services...') 
 
 if __name__ == "__main__":
     main()

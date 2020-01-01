@@ -1,6 +1,10 @@
 import urllib.request
 import json
 import time
+import ssl
+
+
+ssl._create_default_https_context = ssl._create_unverified_context
 
 def getStatus(plugstr="of:0362 btn:3"):
     with urllib.request.urlopen('http://atlas:8888/rf433/') as f:
