@@ -1,6 +1,7 @@
 import threading
 import time
 import logging
+import random
 from rf_helper import RFManager
 
 class homeAI(threading.Thread):
@@ -15,12 +16,20 @@ class homeAI(threading.Thread):
         btn = "3"
         status = self.rf.getPlugStatus(outletFamily, btn)
 
+        new_status = "on"
+        sleep_multiplier = 1
         if status == "on":
-            self.rf.txCode(outletFamily, btn, "off")
-            time.sleep(3)
-        else:
-            self.rf.txCode(outletFamily, btn, "on")
-            time.sleep(1)
+            sleep_multiplier = 3
+            new_status = "off"
+
+        self.rf.txCode(outletFamily, btn, new_status)
+        
+        sleep_time = random.random() * sleep_multiplier
+        while sleep_time < 0.5:
+            sleep_time = random.random() * sleep_multiplier
+
+        self.log.info("%s: sleeping for %s" % (new_status, sleep_time))
+        time.sleep(sleep_time)
 
     def run(self):
         while self.running:
