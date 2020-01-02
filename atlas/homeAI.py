@@ -30,7 +30,7 @@ class homeAI(object):
             sleep_multiplier = 5
             new_status = "off"
 
-        now = dt.datetime.today()
+        now = dt.datetime.today().time()
         self.daytime = self.dawn_time < now and now < self.dusk_time
         if self.daytime:
             new_status = "off"
@@ -47,8 +47,8 @@ class homeAI(object):
     def loopsuntimes(self):
         sleep_time = 3600 * 24
         sun_data = getSunData()
-        self.dawn_time = sun_data.get("dawn")
-        self.dusk_time = sun_data.get("dusk")
+        self.dawn_time = sun_data.get("dawn").time()
+        self.dusk_time = sun_data.get("dusk").time()
         # now = sun_data.get("now")
         # print("dawn:\t{}".format(dawn_time))
         # print("now:\t{}".format(now))
@@ -64,4 +64,7 @@ class homeAI(object):
 if __name__=="__main__":
     hai = homeAI()
     hai.loopsuntimes()
-    hai.periodic()
+    hai.looplights()
+    print(hai.daytime)
+    
+    
