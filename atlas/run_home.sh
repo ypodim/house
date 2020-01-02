@@ -10,4 +10,4 @@ export HOUSE_LOG="house.log"
 if [ -z ${HOUSE_PATH+x} ]; then echo "HOUSE_PATH var is unset, cannot continue" && exit 0; fi
 
 cd $HOUSE_PATH
-python3 main.py --log_file_prefix=$HOUSE_LOG
+python3 main.py --log_file_prefix=$HOUSE_PATH/$HOUSE_LOG

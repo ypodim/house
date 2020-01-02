@@ -13,6 +13,7 @@ class homeAI(object):
         self.lastsun = 0
         self.dawn_time = 0
         self.dusk_time = 0
+        self.daytime = 0
 
     def root(self):
         tornado.ioloop.IOLoop.instance().call_later(0, self.loopsuntimes)
@@ -30,10 +31,9 @@ class homeAI(object):
             new_status = "off"
 
         now = dt.datetime.today()
-        daytime = self.dawn_time < now and now < self.dusk_time
-        if daytime:
+        self.daytime = self.dawn_time < now and now < self.dusk_time
+        if self.daytime:
             new_status = "off"
-        print(daytime)
             
         self.rf.txCode(outletFamily, btn, new_status)
         
