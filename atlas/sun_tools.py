@@ -45,8 +45,8 @@ def getSunData():
         t = getSunTime(k, new_data)
         new_data[k] = t
 
-    new_data["now"] = dt.datetime.today()
     return new_data
 
 if __name__=="__main__":
-    getSunData()
+    for k,v in getSunData().items():
+        print(k,v)

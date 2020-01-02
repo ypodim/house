@@ -2,6 +2,7 @@ import tornado.ioloop
 import time
 import logging
 import random
+import datetime as dt
 from rf_helper import RFManager
 from sun_tools import getSunData
 
@@ -10,11 +11,12 @@ class homeAI(object):
         self.rf = RFManager()
         self.log = logging.getLogger(self.__class__.__name__)
         self.lastsun = 0
-        self.daytime = True
+        self.dawn_time = 0
+        self.dusk_time = 0
 
     def root(self):
-        tornado.ioloop.IOLoop.instance().call_later(0, self.looplights)
-        tornado.ioloop.IOLoop.instance().call_later(0, self.loopsun)
+        tornado.ioloop.IOLoop.instance().call_later(0, self.loopsuntimes)
+        tornado.ioloop.IOLoop.instance().call_later(5, self.looplights)
 
     def looplights(self):
         outletFamily = "0362"
@@ -27,8 +29,11 @@ class homeAI(object):
             sleep_multiplier = 5
             new_status = "off"
 
-        if self.daytime:
+        now = dt.datetime.today()
+        daytime = self.dawn_time < now and now < self.dusk_time
+        if daytime:
             new_status = "off"
+        print(daytime)
             
         self.rf.txCode(outletFamily, btn, new_status)
         
@@ -39,20 +44,24 @@ class homeAI(object):
         # self.log.info("%s: sleeping for %s" % (new_status, sleep_time))
         tornado.ioloop.IOLoop.instance().call_later(sleep_time, self.looplights)
 
-    def loopsun(self):
+    def loopsuntimes(self):
         sleep_time = 3600 * 24
         sun_data = getSunData()
-        dawn_time = sun_data.get("dawn")
-        dusk_time = sun_data.get("dusk")
-        now = sun_data.get("now")
+        self.dawn_time = sun_data.get("dawn")
+        self.dusk_time = sun_data.get("dusk")
+        # now = sun_data.get("now")
         # print("dawn:\t{}".format(dawn_time))
         # print("now:\t{}".format(now))
         # print("dusk:\t{}".format(dusk_time))
-        self.daytime = dawn_time < now and now < dusk_time
         # self.log.info("sun: sleeping for {}".format(sleep_time))
-        tornado.ioloop.IOLoop.instance().call_later(sleep_time, self.loopsun)
+        tornado.ioloop.IOLoop.instance().call_later(sleep_time, self.loopsuntimes)
 
 
     def periodic(self):
         # print("this is periodic {}".format(time.time()))
         pass
+
+if __name__=="__main__":
+    hai = homeAI()
+    hai.loopsuntimes()
+    hai.periodic()
