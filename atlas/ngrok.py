@@ -8,12 +8,16 @@ class Ngrok(object):
         req = urllib.request.Request(url="http://127.0.0.1:4040/api/tunnels")
         with urllib.request.urlopen(req) as f:
             data = json.loads(f.read().decode('utf-8'))
-            print(data.get("tunnels")[0].get("public_url"))
+            data = data.get("tunnels")
+            if not data:
+                return None
+            data = data[0]
+            return data.get("public_url")
     def setup(self):
         pass
 
 
 if __name__=="__main__":
     ng = Ngrok()
-    ng.getLocalInfo()
+    print(ng.getLocalInfo())
 
