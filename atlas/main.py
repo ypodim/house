@@ -50,8 +50,14 @@ class RF433Handler(tornado.web.RequestHandler):
             return
         self.write(dict(status="error: expected 2 params, got %s" % len(params), value=val))
     def get(self):
-        self.write(dict(status=self.brain.rf.getStatus(), daytime=self.brain.daytime))
-
+        plugs = []
+        for plug in self.brain.rf.getStatus():
+            plug["action"] = "on"
+            if plug["status"] == "on":
+                plug["action"] = "off"
+            plugs.append(plug)
+        self.render("index.html", daytime=self.brain.daytime, plugs=plugs)
+        
 class DefaultHandler(tornado.web.RequestHandler):
     def get(self):
         self.write("ok")

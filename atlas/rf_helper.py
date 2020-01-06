@@ -16,6 +16,8 @@ class Plug:
         self.status = None
     def __repr__(self):
         return "of:%s btn:%s status:%s" % (self.of, self.btn, self.status)
+    def json(self):
+        return dict(of=self.of, btn=self.btn, status=self.status)
     def getStatus(self):
         return self.status
     def tx(self, plugstate, pin=17):
@@ -60,7 +62,7 @@ class RFManager:
             return None
         return plug.tx(val)
     def getStatus(self):
-        return ["%s"%p for p in self.plugs]
+        return [p.json() for p in self.plugs]
         
 
 if __name__=="__main__":
