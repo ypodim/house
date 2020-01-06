@@ -5,6 +5,7 @@ import random
 import datetime as dt
 from rf_helper import RFManager
 from sun_tools import getSunData
+from ngrok import Ngrok
 
 class homeAI(object):
     def __init__(self):
