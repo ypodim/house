@@ -10,7 +10,7 @@ class Ngrok(object):
             with urllib.request.urlopen(req) as f:
                 data = json.loads(f.read().decode('utf-8'))
                 return data.get("tunnels")[0].get("public_url")
-        except ConnectionRefusedError:
+        except urllib.error.URLError:
             print("ConnectionRefusedError")
             return None
             
