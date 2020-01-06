@@ -1,4 +1,5 @@
 import urllib.request
+import json
 
 class Ngrok(object):
     def __init__(self):
@@ -6,7 +7,7 @@ class Ngrok(object):
     def getLocalInfo(self):
         req = urllib.request.Request(url="http://127.0.0.1:4040/api/tunnels")
         with urllib.request.urlopen(req) as f:
-            print(f.read().decode('utf-8'))
+            data = json.loads(f.read().decode('utf-8'))
     def setup(self):
         pass
 
