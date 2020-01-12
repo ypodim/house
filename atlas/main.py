@@ -65,7 +65,7 @@ class DefaultHandler(tornado.web.RequestHandler):
 
 def main():
     tornado.options.parse_command_line()
-    tornado.log.enable_pretty_logging()
+    # tornado.log.enable_pretty_logging()
     access_log = logging.getLogger('tornado.access')
     access_log.info("starting up")
 
