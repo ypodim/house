@@ -4,6 +4,10 @@ import json
 class Ngrok(object):
     def __init__(self):
         pass
+    @property
+    def url(self):
+        return "this is it"
+    
     def getLocalInfo(self):
         req = urllib.request.Request(url="http://127.0.0.1:4040/api/tunnels")
         try:
@@ -13,12 +17,13 @@ class Ngrok(object):
         except urllib.error.URLError:
             print("ConnectionRefusedError")
             return None
-            
+
     def setup(self):
         pass
 
 
 if __name__=="__main__":
     ng = Ngrok()
-    print(ng.getLocalInfo())
+    print(ng.url)
+    # print(ng.getLocalInfo())
 

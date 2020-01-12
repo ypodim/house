@@ -2,12 +2,19 @@ import tornado.ioloop
 import tornado.web
 import tornado.options
 import tornado.log
+import tornado.locks
 import json
 import datetime
 import logging
 import time
+import os
+
+from tornado.options import define, options
 
 from homeAI import homeAI
+
+define("port", default=8888, help="run on the given port", type=int)
+
 
 class TemperatureHandler(tornado.web.RequestHandler):
     def post(self):
@@ -62,8 +69,29 @@ class DefaultHandler(tornado.web.RequestHandler):
     def get(self):
         self.write("ok")
 
+class Application(tornado.web.Application):
+    def __init__(self, brain):
+        handlers = [
+            (r"/temperature.*", TemperatureHandler),
+            (r"/sensor/.*", SensorHandler, dict(brain=brain)),
+            (r"/rf433.*", RF433Handler, dict(brain=brain)),
+            (r"/", DefaultHandler),
+            (r'/favicon.ico', tornado.web.StaticFileHandler),
+            (r'/static/', tornado.web.StaticFileHandler),
+        ]
+        settings = dict(
+            blog_title=u"Tornado Blog",
+            template_path=os.path.join(os.path.dirname(__file__), "html"),
+            static_path=os.path.join(os.path.dirname(__file__), "static"),
+            # ui_modules={"Entry": EntryModule},
+            # xsrf_cookies=True,
+            cookie_secret="__TODO:_GENERATE_YOUR_OWN_RANDOM_VALUE_HERE__",
+            login_url="/auth/login",
+            debug=True,
+        )
+        super(Application, self).__init__(handlers, **settings)
 
-def main():
+async def main(shutdown_event):
     tornado.options.parse_command_line()
     # tornado.log.enable_pretty_logging()
     access_log = logging.getLogger('tornado.access')
@@ -71,28 +99,22 @@ def main():
 
     brain = homeAI()
 
-    settings = dict(template_path="html", static_path="static", debug=True)
-    app = tornado.web.Application([
-        (r"/temperature.*", TemperatureHandler),
-        (r"/sensor/.*", SensorHandler, dict(brain=brain)),
-        (r"/rf433.*", RF433Handler, dict(brain=brain)),
-        (r"/", DefaultHandler),
-        
-        (r'/favicon.ico', tornado.web.StaticFileHandler),
-        (r'/static/', tornado.web.StaticFileHandler),
-    ], **settings)
-
-    try:
-        io_loop = tornado.ioloop.IOLoop.current()
-        io_loop.add_callback(brain.root)
-        pc = tornado.ioloop.PeriodicCallback(brain.periodic, 1000)
-        pc.start()
-        app.listen(8888)
-        io_loop.start()
-    except KeyboardInterrupt:
-        logging.info('stopping services...') 
+    app = Application(brain)
+    
+    io_loop = tornado.ioloop.IOLoop.current()
+    io_loop.add_callback(brain.root)
+    pc = tornado.ioloop.PeriodicCallback(brain.periodic, 1000)
+    pc.start()
+    app.listen(options.port)
+    await shutdown_event.wait()
 
 if __name__ == "__main__":
-    main()
+    shutdown_event = tornado.locks.Event()
+    try:
+        tornado.ioloop.IOLoop.current().run_sync(lambda: main(shutdown_event))
+    except:
+        print("time to die")
+        shutdown_event.set()
+
 
 
