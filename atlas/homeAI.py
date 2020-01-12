@@ -12,8 +12,8 @@ class homeAI(object):
         self.rf = RFManager()
         self.log = logging.getLogger(self.__class__.__name__)
         self.lastsun = 0
-        self.dawn_time = 0
-        self.dusk_time = 0
+        self.dawn_time = None
+        self.dusk_time = None
         self.daytime = 0
 
     def root(self):
@@ -32,7 +32,8 @@ class homeAI(object):
             new_status = "off"
 
         now = dt.datetime.today().time()
-        self.daytime = self.dawn_time < now and now < self.dusk_time
+        if self.dawn_time != None and self.dusk_time != None:
+            self.daytime = self.dawn_time < now and now < self.dusk_time
         if self.daytime:
             new_status = "off"
             
