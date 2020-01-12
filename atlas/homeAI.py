@@ -46,8 +46,13 @@ class homeAI(object):
         tornado.ioloop.IOLoop.instance().call_later(sleep_time, self.looplights)
 
     def loopsuntimes(self):
-        sleep_time = 3600 * 24
-        sun_data = getSunData()
+        try:
+            sun_data = getSunData()
+        except:
+            sleep_time = 10
+            self.log.error("sun: network down? Trying again in {} seconds".format(sleep_time))
+            tornado.ioloop.IOLoop.instance().call_later(sleep_time, self.loopsuntimes)
+            return
         self.dawn_time = sun_data.get("dawn").time()
         self.dusk_time = sun_data.get("dusk").time()
         # now = sun_data.get("now")
@@ -55,6 +60,7 @@ class homeAI(object):
         # print("now:\t{}".format(now))
         # print("dusk:\t{}".format(dusk_time))
         # self.log.info("sun: sleeping for {}".format(sleep_time))
+        sleep_time = 3600 * 24
         tornado.ioloop.IOLoop.instance().call_later(sleep_time, self.loopsuntimes)
 
 
