@@ -5,20 +5,34 @@ import random
 import datetime as dt
 from rf_helper import RFManager
 from sun_tools import getSunData
+from garageDoor import GarageDoor
 from ngrok import Ngrok
+
+try:
+    import RPi.GPIO as GPIO
+except:
+    GPIO = None
 
 class homeAI(object):
     def __init__(self):
         self.rf = RFManager()
+        self.garageDoor = GarageDoor(GPIO)
         self.log = logging.getLogger(self.__class__.__name__)
         self.lastsun = 0
         self.dawn_time = None
         self.dusk_time = None
         self.daytime = 0
+        if not GPIO:
+            self.log.error("Could not load GPIO. Not running on Rasp?")
 
     def root(self):
         tornado.ioloop.IOLoop.instance().call_later(0, self.loopsuntimes)
         tornado.ioloop.IOLoop.instance().call_later(5, self.looplights)
+        tornado.ioloop.IOLoop.instance().call_later(0, self.loopGarageDoor)
+
+    def loopGarageDoor(self):
+        self.garageDoor.pollState()
+        tornado.ioloop.IOLoop.instance().call_later(0.002, self.loopGarageDoor)
 
     def looplights(self):
         outletFamily = "0362"
@@ -71,8 +85,11 @@ class homeAI(object):
 
 if __name__=="__main__":
     hai = homeAI()
-    hai.loopsuntimes()
-    hai.looplights()
-    print(hai.daytime)
+    hai.loopGarageDoor()
+    tornado.ioloop.IOLoop.current().start()
+
+    # hai.loopsuntimes()
+    # hai.looplights()
+    # print(hai.daytime)
     
     
