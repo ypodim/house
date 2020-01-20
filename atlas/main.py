@@ -3,6 +3,7 @@ import tornado.web
 import tornado.options
 import tornado.log
 import tornado.locks
+import tornado.websocket
 import json
 import datetime
 import logging
@@ -45,15 +46,11 @@ class GarageDoorHandler(tornado.web.RequestHandler):
     def initialize(self, brain):
         self.brain = brain
     def put(self):
-        params = self.request.path.split('/')[2:]
         val = self.get_argument("value")
-        logging.info("Value:%s" % val)
-        if len(params) == 2:
-            self.write(dict(status="ok", result=1))
-            return
-        self.write(dict(status="error: expected 2 params, got %s" % len(params), value=val))
+        if val in ("1", "0"): self.brain.toggleGarageDoor()
+        self.write(dict(status="ok", value=val))
     def get(self):
-        self.write(dict(status=self.brain.garageDoor.isOpen))
+        self.write(dict(status=self.brain.garageDoor.isOpen, irval=self.brain.garageDoor.irval))
 
 class RF433Handler(tornado.web.RequestHandler):
     def initialize(self, brain):
@@ -81,14 +78,32 @@ class RF433Handler(tornado.web.RequestHandler):
         
 class DefaultHandler(tornado.web.RequestHandler):
     def get(self):
-        self.write("ok")
+        self.render("index.html")
+
+class PushDataHandler(tornado.websocket.WebSocketHandler):
+    waiters = set()
+    def open(self):
+        PushDataHandler.waiters.add(self)
+
+    def on_message(self, message):
+        self.write_message(u"You said: {} {}".format(message, time.time()))
+
+    def on_close(self):
+        PushDataHandler.waiters.remove(self)
+
+    @classmethod
+    def push(cls, message):
+        for waiter in cls.waiters:
+            waiter.write_message(message)
+
 
 class Application(tornado.web.Application):
     def __init__(self, brain):
         handlers = [
+            (r"/websocket", PushDataHandler),
             (r"/temperature.*", TemperatureHandler),
             (r"/sensor/.*", SensorHandler, dict(brain=brain)),
-            (r"/garagedoor/.*", GarageDoorHandler, dict(brain=brain)),
+            (r"/garagedoor.*", GarageDoorHandler, dict(brain=brain)),
             (r"/rf433.*", RF433Handler, dict(brain=brain)),
             (r"/", DefaultHandler),
             (r'/favicon.ico', tornado.web.StaticFileHandler),
@@ -117,7 +132,7 @@ async def main(shutdown_event):
     app = Application(brain)
     
     io_loop = tornado.ioloop.IOLoop.current()
-    io_loop.add_callback(brain.root)
+    io_loop.add_callback(brain.root, PushDataHandler.push)
     pc = tornado.ioloop.PeriodicCallback(brain.periodic, 1000)
     pc.start()
     app.listen(options.port)

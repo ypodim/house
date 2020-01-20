@@ -1,24 +1,36 @@
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script type="text/javascript">
-    function theFunction(obj) {
-        var of = obj.getAttribute("of");
-        var btn = obj.getAttribute("btn");
-        var action = obj.getAttribute("action");
-        const Http = new XMLHttpRequest();
-        const url='/rf433/'+of+'/'+btn;
-        var params = "value="+action;
-        Http.open('PUT', url);
-        
-        Http.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        Http.onreadystatechange = (e) => {
-            console.log(Http.responseText);
-        }
-        Http.send(params);
-    }
+$( document ).ready(function() {
+    var ws = new WebSocket("ws://" + location.host + "/websocket");
+    ws.onopen = function() {
+       ws.send("Hello, world");
+    };
+    ws.onmessage = function (evt) {
+       $("#irval").html(evt.data);
+    };
+
+    $("#btn").click(function() {
+        $.ajax({
+          url: "/garagedoor",
+          method: "PUT",
+          data: { value : 1 },
+        }).done(function( html ) {
+          console.log(html);
+        });
+    });
+});
 </script>
-daytime: {{ daytime }}
-{% for plug in plugs %}
-    
-    <div style="margin-top: 10px">
-    {{ plug }}<a of="{{plug['of']}}" btn="{{plug['btn']}}" action="{{plug['action']}}" onclick="return theFunction(this)" href="#/" style="margin-left: 10px">{{ plug['action'] }}</a>
-    </div>
-{% end %}
+<style>
+#btn {cursor: pointer; width: 100px; margin-top: 20px;}
+</style>
+</head>
+<body>
+
+
+<div id="irval"></div>
+<div id="btn">toggle</div>
+
+</body>
+</html>

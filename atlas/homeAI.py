@@ -1,5 +1,4 @@
 import tornado.ioloop
-import time
 import logging
 import random
 import datetime as dt
@@ -25,14 +24,20 @@ class homeAI(object):
         if not GPIO:
             self.log.error("Could not load GPIO. Not running on Rasp?")
 
-    def root(self):
+    def toggleGarageDoor(self):
+        self.garageDoor.toggle()
+
+    def root(self, websocketClb):
+        self.websocketClb = websocketClb
         tornado.ioloop.IOLoop.instance().call_later(0, self.loopsuntimes)
         tornado.ioloop.IOLoop.instance().call_later(5, self.looplights)
         tornado.ioloop.IOLoop.instance().call_later(0, self.loopGarageDoor)
 
     def loopGarageDoor(self):
         self.garageDoor.pollState()
-        tornado.ioloop.IOLoop.instance().call_later(0.002, self.loopGarageDoor)
+        msg = "{} {} {}".format(self.garageDoor.isOpen, self.garageDoor.irval, self.garageDoor.lastseen)
+        self.websocketClb(msg)
+        tornado.ioloop.IOLoop.instance().call_later(0.1, self.loopGarageDoor)
 
     def looplights(self):
         outletFamily = "0362"

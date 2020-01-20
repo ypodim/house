@@ -1,5 +1,6 @@
 import logging
 import spidev
+import time
 
 from adc import ADC
 
@@ -10,33 +11,37 @@ class GarageDoor(object):
         self.relayPin = 26
         if self.gpio:
             self.gpio.setmode(self.gpio.BCM)
-            self.gpio.setup(self.relayPin, self.gpio.OUT)
+            # self.gpio.setup(self.relayPin, self.gpio.OUT)
         else: 
             self.log.error("GPIO not found")
 
         self.adc = ADC()
-        self.IR_Threshold = 200
+        self.IR_Threshold = 400
         self.lastseen = []
-        self.seenLength = 20
+        self.seenLength = 5
         self._isOpen = 0
-    def setOpen(self, state):
-        if self.gpio:
-            self.gpio.output(self.relayPin, state)
+
+    def toggle(self):
+        print("toggling")
+        if not self.gpio:
+            return
+        self.gpio.setmode(self.gpio.BCM)
+        self.gpio.setup(self.relayPin, self.gpio.OUT)
+        self.gpio.output(self.relayPin, 1)
+        time.sleep(0.1)
+        self.gpio.output(self.relayPin, 0)
 
     @property
     def isOpen(self):
-        return self._isOpen
+        return "{}".format(self._isOpen)
+    
+    @property
+    def irval(self):
+        return "{}".format(self.lastseen[-1])
     
     def pollState(self):
         output = self.adc.getValue(0)
-        self._isOpen = 0
-        if output < self.IR_Threshold:
-            isOutlier = False
-            for previousVal in self.lastseen:
-                if abs(output - previousVal) > 30:
-                    isOutlier = True
-            if not isOutlier:
-                self._isOpen = 1
+        self._isOpen = int(output < self.IR_Threshold)
 
         self.lastseen.append(output)
         while len(self.lastseen) > self.seenLength:
@@ -44,8 +49,12 @@ class GarageDoor(object):
 
 if __name__=="__main__":
     import RPi.GPIO as GPIO
+    import sys
     from time import sleep
     door = GarageDoor(GPIO)
-    while 1:
-        door.pollState()
-        sleep(0.002)
+    # door.setOpen(int(sys.argv[1]))
+    #while 1:
+    #    door.pollState()
+    #    sleep(0.002)
+
+
