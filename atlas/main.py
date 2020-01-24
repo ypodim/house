@@ -86,7 +86,8 @@ class PushDataHandler(tornado.websocket.WebSocketHandler):
         PushDataHandler.waiters.add(self)
 
     def on_message(self, message):
-        self.write_message(u"You said: {} {}".format(message, time.time()))
+        # self.write_message(u"You said: {} {}".format(message, time.time()))
+        pass
 
     def on_close(self):
         PushDataHandler.waiters.remove(self)

@@ -1,6 +1,7 @@
 import tornado.ioloop
 import logging
 import random
+import json
 import datetime as dt
 from rf_helper import RFManager
 from sun_tools import getSunData
@@ -35,8 +36,9 @@ class homeAI(object):
 
     def loopGarageDoor(self):
         self.garageDoor.pollState()
-        msg = "{} {} {}".format(self.garageDoor.isOpen, self.garageDoor.irval, self.garageDoor.lastseen)
-        self.websocketClb(msg)
+        garagemsg = dict(isopen=self.garageDoor.isOpen, irval=self.garageDoor.irval)
+        msg = dict(garagedoor=garagemsg, plugs=self.rf.getStatus())
+        self.websocketClb(json.dumps(msg))
         tornado.ioloop.IOLoop.instance().call_later(0.1, self.loopGarageDoor)
 
     def looplights(self):
