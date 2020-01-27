@@ -95,7 +95,10 @@ class PushDataHandler(tornado.websocket.WebSocketHandler):
     @classmethod
     def push(cls, message):
         for waiter in cls.waiters:
-            waiter.write_message(message)
+            try:
+                waiter.write_message(message)
+            except:
+                logging.error("bad websocket to {}".format(waiter))
 
 
 class Application(tornado.web.Application):

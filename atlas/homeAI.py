@@ -37,7 +37,22 @@ class homeAI(object):
     def loopGarageDoor(self):
         self.garageDoor.pollState()
         garagemsg = dict(isopen=self.garageDoor.isOpen, irval=self.garageDoor.irval)
-        msg = dict(garagedoor=garagemsg, plugs=self.rf.getStatus())
+
+
+        tomorrow = dt.date.today() + dt.timedelta(days=1)
+        next_event = dt.datetime.now()
+        if self.dawn_time != None and self.dusk_time != None:
+            if self.daytime:
+                next_event = dt.datetime.combine(tomorrow, self.dusk_time)
+            else: 
+                next_event = dt.datetime.combine(tomorrow, self.dawn_time)
+        
+        timeleft = next_event - dt.datetime.now().replace(microsecond=0)
+        while timeleft > dt.timedelta(days=1):
+            timeleft -= dt.timedelta(days=1)
+
+        sensors = dict(daylight=self.daytime, timeleft="{}".format(timeleft))
+        msg = dict(garagedoor=garagemsg, plugs=self.rf.getStatus(), sensors=sensors)
         self.websocketClb(json.dumps(msg))
         tornado.ioloop.IOLoop.instance().call_later(0.1, self.loopGarageDoor)
 
