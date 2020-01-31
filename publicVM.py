@@ -52,7 +52,7 @@ class Application(tornado.web.Application):
             (r"/data", DataHandler, dict(ds=ds)),
         ]
         settings = dict(
-            template_path=os.path.join(os.path.dirname(__file__), "html"),
+            template_path=os.path.join(os.path.dirname(__file__), "docs"),
             # xsrf_cookies=True,
             cookie_secret="__TODO:_GENERATE_YOUR_OWN_RANDOM_VALUE_HERE__",
             login_url="/auth/login",
