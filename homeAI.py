@@ -2,21 +2,23 @@ import tornado.ioloop
 import logging
 import random
 import json
+import urllib.request
+import urllib.parse
 import datetime as dt
 from rf_helper import RFManager
 from sun_tools import getSunData
-from garageDoor import GarageDoor
-from ngrok import Ngrok
 
 try:
     import RPi.GPIO as GPIO
+    from garageDoor import GarageDoor
 except:
     GPIO = None
+    GarageDoor = None
 
 class homeAI(object):
     def __init__(self):
         self.rf = RFManager()
-        self.garageDoor = GarageDoor(GPIO)
+        self.garageDoor = None
         self.log = logging.getLogger(self.__class__.__name__)
         self.lastsun = 0
         self.dawn_time = None
@@ -24,9 +26,12 @@ class homeAI(object):
         self.daytime = 0
         if not GPIO:
             self.log.error("Could not load GPIO. Not running on Rasp?")
+        if GarageDoor:
+            self.garageDoor = GarageDoor(GPIO)
 
     def toggleGarageDoor(self):
-        self.garageDoor.toggle()
+        if self.garageDoor:
+            self.garageDoor.toggle()
 
     def root(self, websocketClb):
         self.websocketClb = websocketClb
@@ -35,9 +40,10 @@ class homeAI(object):
         tornado.ioloop.IOLoop.instance().call_later(0, self.loopGarageDoor)
 
     def loopGarageDoor(self):
-        self.garageDoor.pollState()
-        garagemsg = dict(isopen=self.garageDoor.isOpen, irval=self.garageDoor.irval)
-
+        garagemsg = "test"
+        if self.garageDoor:
+            self.garageDoor.pollState()
+            garagemsg = dict(isopen=self.garageDoor.isOpen, irval=self.garageDoor.irval)
 
         tomorrow = dt.date.today() + dt.timedelta(days=1)
         next_event = dt.datetime.now()
@@ -92,26 +98,22 @@ class homeAI(object):
             return
         self.dawn_time = sun_data.get("dawn").time()
         self.dusk_time = sun_data.get("dusk").time()
-        # now = sun_data.get("now")
-        # print("dawn:\t{}".format(dawn_time))
-        # print("now:\t{}".format(now))
-        # print("dusk:\t{}".format(dusk_time))
-        # self.log.info("sun: sleeping for {}".format(sleep_time))
         sleep_time = 3600 * 24
         tornado.ioloop.IOLoop.instance().call_later(sleep_time, self.loopsuntimes)
 
 
     def periodic(self):
-        # print("this is periodic {}".format(time.time()))
-        pass
+        data = dict(a=99)
+        data = urllib.parse.urlencode(dict(data=json.dumps(data)))
+        data = data.encode('ascii')
+        with urllib.request.urlopen("http://localhost:9999/data", data) as f:
+            pass
+        
 
 if __name__=="__main__":
     hai = homeAI()
     hai.loopGarageDoor()
     tornado.ioloop.IOLoop.current().start()
 
-    # hai.loopsuntimes()
-    # hai.looplights()
-    # print(hai.daytime)
     
     

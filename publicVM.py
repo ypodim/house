@@ -1,70 +1,74 @@
 import tornado.ioloop
-import tornado.web
 import tornado.options
-import tornado.log
 import tornado.locks
 import tornado.websocket
 import json
-import datetime
 import logging
-import time
 import os
 
-from tornado.options import define, options
+tornado.options.define("port", default=9999, help="port", type=int)
 
-define("port", default=8888, help="run on the given port", type=int)
+class DataStructure(object):
+    def __init__(self):
+        self.data = None
+    def update(self, data):
+        self.data = data
+    def get(self):
+        return json.dumps(self.data)
 
 class DefaultHandler(tornado.web.RequestHandler):
     def get(self):
         self.render("index.html")
 
+class DataHandler(tornado.web.RequestHandler):
+    def initialize(self, ds):
+        self.ds = ds
+    def get(self):
+        self.write(self.ds.get())
+    def post(self):
+        data = self.get_argument("data")
+        data = json.loads(data)
+        self.ds.update(data)
+        self.write("ok {}".format(data))
+
 class PushDataHandler(tornado.websocket.WebSocketHandler):
     waiters = set()
     def open(self):
         PushDataHandler.waiters.add(self)
-
     def on_message(self, message):
-        # self.write_message(u"You said: {} {}".format(message, time.time()))
         pass
-
     def on_close(self):
         PushDataHandler.waiters.remove(self)
-
     @classmethod
     def push(cls, message):
         for waiter in cls.waiters:
             waiter.write_message(message)
 
-
 class Application(tornado.web.Application):
-    def __init__(self):
+    def __init__(self, ds):
         handlers = [
             (r"/websocket", PushDataHandler),
             (r"/", DefaultHandler),
-            (r'/favicon.ico', tornado.web.StaticFileHandler),
-            (r'/static/', tornado.web.StaticFileHandler),
+            (r"/data", DataHandler, dict(ds=ds)),
         ]
         settings = dict(
-            blog_title=u"Tornado Blog",
             template_path=os.path.join(os.path.dirname(__file__), "html"),
-            static_path=os.path.join(os.path.dirname(__file__), "static"),
-            # ui_modules={"Entry": EntryModule},
             # xsrf_cookies=True,
             cookie_secret="__TODO:_GENERATE_YOUR_OWN_RANDOM_VALUE_HERE__",
             login_url="/auth/login",
             debug=True,
+            static_path=os.path.join(os.path.dirname(__file__), "docs"),
         )
         super(Application, self).__init__(handlers, **settings)
 
 async def main(shutdown_event):
+    ds = DataStructure()
     tornado.options.parse_command_line()
     access_log = logging.getLogger('tornado.access')
     access_log.info("starting up")
-
-    app = Application()
-    
+    app = Application(ds)
     io_loop = tornado.ioloop.IOLoop.current()
-    app.listen(options.port)
+    app.listen(tornado.options.options.port)
     await shutdown_event.wait()
 
 if __name__ == "__main__":
@@ -74,6 +78,3 @@ if __name__ == "__main__":
     except:
         print("time to die")
         shutdown_event.set()
-
-
-
