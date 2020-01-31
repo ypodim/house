@@ -146,7 +146,7 @@ if __name__ == "__main__":
     shutdown_event = tornado.locks.Event()
     try:
         tornado.ioloop.IOLoop.current().run_sync(lambda: main(shutdown_event))
-    except:
+    except KeyboardInterrupt:
         print("time to die")
         shutdown_event.set()
 

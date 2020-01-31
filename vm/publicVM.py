@@ -18,7 +18,7 @@ class DataStructure(object):
 
 class DefaultHandler(tornado.web.RequestHandler):
     def get(self):
-        self.render("index.html")
+        self.write("ok")
 
 class DataHandler(tornado.web.RequestHandler):
     def initialize(self, ds):
@@ -52,12 +52,10 @@ class Application(tornado.web.Application):
             (r"/data", DataHandler, dict(ds=ds)),
         ]
         settings = dict(
-            template_path=os.path.join(os.path.dirname(__file__), "docs"),
             # xsrf_cookies=True,
             cookie_secret="__TODO:_GENERATE_YOUR_OWN_RANDOM_VALUE_HERE__",
             login_url="/auth/login",
             debug=True,
-            static_path=os.path.join(os.path.dirname(__file__), "docs"),
         )
         super(Application, self).__init__(handlers, **settings)
 
@@ -75,6 +73,6 @@ if __name__ == "__main__":
     shutdown_event = tornado.locks.Event()
     try:
         tornado.ioloop.IOLoop.current().run_sync(lambda: main(shutdown_event))
-    except:
+    except KeyboardInterrupt:
         print("time to die")
         shutdown_event.set()
