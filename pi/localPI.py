@@ -15,6 +15,7 @@ from tornado.options import define, options
 from homeAI import homeAI
 
 define("port", default=8888, help="run on the given port", type=int)
+define("VMurl", default="http://localhost:9999/data", help="VM remote url to post data", type=str)
 
 
 class TemperatureHandler(tornado.web.RequestHandler):

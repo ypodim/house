@@ -1,19 +1,9 @@
----
-layout: page
-title: House
-permalink: /house/
----
-
-
+<html>
 <head>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
 <script type="text/javascript">
-
-var remote_host = location.host;
-remote_host = "localhost:9999";
-
 $( document ).ready(function() {
-    var ws = new WebSocket("ws://" + remote_host + "/websocket");
+    var ws = new WebSocket("ws://" + location.host + "/websocket");
     ws.onopen = function() {
         ws.send("Hello, world");
     };
@@ -42,23 +32,19 @@ $( document ).ready(function() {
     };
 
     $("#btn").click(function() {
-        var cmd = {"garageDoor":"toggle"};
         $.ajax({
-          url: "http://" + remote_host + "",
-          method: "POST",
-          data: {"cmd":JSON.stringify(cmd)},
-        }).done(function(html) {
-          // console.log(html);
-        }).fail(function(jqXHR, textStatus, errorThrown){
-          console.log(textStatus);
-          console.log(errorThrown);
+          url: "/garagedoor",
+          method: "PUT",
+          data: { value : 1 },
+        }).done(function( html ) {
+          console.log(html);
         });
     });
     $(".plug").on("click", function(){
         var of = $(this).attr("of");
         var btn = $(this).attr("btn");
         var value = $(this).attr("state") == "on" ? "off":"on" ;
-        var url = "http://" + remote_host + "/rf433/"+of+"/"+btn;
+        var url = "/rf433/"+of+"/"+btn;
         $.ajax({
           url: url,
           method: "PUT",
@@ -68,7 +54,7 @@ $( document ).ready(function() {
 });
 </script>
 <style>
-/*body { width: auto; font-size: 48px; }*/
+body { width: auto; font-size: 48px; }
 /*html { margin: 0 auto; }*/
 #btn { cursor: pointer; }
 #btn:hover { background-color: gray; }
@@ -99,3 +85,5 @@ $( document ).ready(function() {
     <div class="plug" id="plug7">11</div>
     <div class="plug" id="plug8">day/night</div>
 </div>
+</body>
+</html>

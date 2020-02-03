@@ -1,12 +1,17 @@
 import logging
-import spidev
 import time
 
-from adc import ADC
+try:
+    from adc import ADC
+    import RPi.GPIO as GPIO 
+except:
+    ADC = None
+    GPIO = None
+    logging.error("Could not load GPIO. Not running on Rasp?")
 
 class GarageDoor(object):
-    def __init__(self, gpio):
-        self.gpio = gpio
+    def __init__(self):
+        self.gpio = GPIO
         self.log = logging.getLogger(self.__class__.__name__)
         self.relayPin = 26
         if self.gpio:
@@ -15,14 +20,14 @@ class GarageDoor(object):
         else: 
             self.log.error("GPIO not found")
 
-        self.adc = ADC()
+        if ADC:
+            self.adc = ADC()
         self.IR_Threshold = 400
         self.lastseen = []
         self.seenLength = 5
         self._isOpen = 0
 
     def toggle(self):
-        print("toggling")
         if not self.gpio:
             return
         self.gpio.setmode(self.gpio.BCM)
@@ -37,9 +42,12 @@ class GarageDoor(object):
     
     @property
     def irval(self):
-        return "{}".format(self.lastseen[-1])
+        if self.lastseen:
+            return "{}".format(self.lastseen[-1])
     
     def pollState(self):
+        if not ADC:
+            return
         output = self.adc.getValue(0)
         self._isOpen = int(output < self.IR_Threshold)
 
