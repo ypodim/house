@@ -1,6 +1,7 @@
 import json
 import sys
 import logging
+import time
 from collections import defaultdict
 try:
     from rpi_rf import RFDevice
@@ -38,6 +39,7 @@ class Plug:
         self.status = plugstate
         return code
 
+
 class RFManager:
     def __init__(self):
         self.plugs = []
@@ -63,9 +65,26 @@ class RFManager:
         return plug.tx(val)
     def getStatus(self):
         return [p.json() for p in self.plugs]
-        
+
+class RFReceiver(object):
+    def __init__(self, pin=27):
+        self.rfdevice = RFDevice(pin)
+        self.rfdevice.enable_rx()
+    def recv(self):
+        try:
+            timestamp = None
+            while True:
+                rxtstamp = self.rfdevice.rx_code_timestamp
+                if rxtstamp and rxtstamp != timestamp:
+                    timestamp = self.rfdevice.rx_code_timestamp
+                    print("{} [pulselength {}]", (str(self.rfdevice.rx_code), str(self.rfdevice.rx_pulselength)))
+                time.sleep(0.01)
+        except KeyboardInterrupt:
+            self.rfdevice.cleanup()
+
 
 if __name__=="__main__":
-    import sys
-    rf = RFManager()
-    print(rf.txCode("0362", "3", sys.argv[1]))
+    # rf = RFDevice()
+    # print(rf.txCode("0306", "2", sys.argv[1]))
+    rfrecv = RFReceiver()
+    rfrecv.recv()

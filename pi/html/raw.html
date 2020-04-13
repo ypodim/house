@@ -17,48 +17,47 @@ $( document ).ready(function() {
         $(".garage1").css("background-color", msg.garagedoor.isopen == "1" ? "red":"green");
         $(".garage2").html("irval: "+msg.garagedoor.irval);
 
-        for (var i = 0; i < msg.plugs.length; i++) {
-            var of = msg.plugs[i].of;
-            var btn = msg.plugs[i].btn;
-            var status = msg.plugs[i].status;
-            $("#plug"+i)
-                .html(of+"<br>"+btn+"<br>"+status)
-                .attr("of",of)
-                .attr("btn",btn)
-                .attr("state",status)
-        }
-
         var daylight = msg.sensors.daylight == "1" ? "daytime" : "nighttime";
         daylight += "<br>for another ";
         daylight += msg.sensors.timeleft
-        $("#plug8").html(daylight);
-        $("#plug8").css("background-color", msg.sensors.daylight == "1" ? "yellow":"blue");
     };
 
     $("#btn").click(function() {
-        $.ajax({
-          url: "/garagedoor",
-          method: "PUT",
-          data: { value : 1 },
-        }).done(function( html ) {
-          console.log(html);
-        });
+      $.ajax({
+        url: "/garagedoor",
+        method: "PUT",
+        data: { value : 1 },
+      }).done(function( html ) {
+        console.log(html);
+      });
     });
-    $(".plug").on("click", function(){
-        var of = $(this).attr("of");
-        var btn = $(this).attr("btn");
-        var value = $(this).attr("state") == "on" ? "off":"on" ;
-        var url = "/rf433/"+of+"/"+btn;
-        $.ajax({
-          url: url,
-          method: "PUT",
-          data: { "value" : value }
-        });
+
+    $("#setter").click(function(){
+      $.ajax({
+        url: "/actions",
+        method: "PUT",
+        data: { action : Math.random() },
+      }).done(function( html ) {
+        console.log(html);
+      });
     });
+
+    var poll = function() {
+      $.ajax({
+        url: "/data/",
+        method: "GET",
+        // data: { value : 1 },
+      }).done(function( data ) {
+        $("#debug > span").html(JSON.stringify(data.data));
+        $("#last_update > span").html(data.last_update);
+      });
+      setTimeout(poll, 1000);
+    }
+    poll();
 });
 </script>
 <style>
-body { width: auto; font-size: 48px; }
+body, button { width: auto; font-size: 48px; }
 /*html { margin: 0 auto; }*/
 #btn { cursor: pointer; }
 #btn:hover { background-color: gray; }
@@ -78,11 +77,14 @@ body { width: auto; font-size: 48px; }
   grid-auto-flow: row;
 }
 .container div { background-color: #eee; padding: 20px; border-radius: 5px;}
-.plug:hover { background-color: gray; }
 
 </style>
 </head>
 <body>
+<div id="last_update">last update: <span></span></div>
+<div id="debug">data: <span></span></div>
+<button id="setter">toggle garage door</button>
+
 <div class="adc-container">
     <div class="adc" id="adc0">1</div>
     <div class="adc" id="adc1">1</div>
@@ -97,15 +99,6 @@ body { width: auto; font-size: 48px; }
     <div class="garage1">1</div>
     <div class="garage2">2</div>
     <div class="garage3"><div id="btn">toggle</div></div>
-    <div class="plug" id="plug0">4</div>
-    <div class="plug" id="plug1">5</div>
-    <div class="plug" id="plug2">6</div>
-    <div class="plug" id="plug3">7</div>
-    <div class="plug" id="plug4">8</div>
-    <div class="plug" id="plug5">9</div>
-    <div class="plug" id="plug6">10</div>
-    <div class="plug" id="plug7">11</div>
-    <div class="plug" id="plug8">day/night</div>
 </div>
 </body>
 </html>
