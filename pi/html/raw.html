@@ -36,7 +36,7 @@ $( document ).ready(function() {
       $.ajax({
         url: "/actions",
         method: "PUT",
-        data: { action : Math.random() },
+        data: { action : "garage.door.toggle" },
       }).done(function( html ) {
         console.log(html);
       });
@@ -48,8 +48,11 @@ $( document ).ready(function() {
         method: "GET",
         // data: { value : 1 },
       }).done(function( data ) {
-        $("#debug > span").html(JSON.stringify(data.data));
+        // $("#debug > span").html(JSON.stringify(data.data));
         $("#last_update > span").html(data.last_update);
+        $("#adc > span").html(JSON.stringify(data.data.sensors.adc));
+        $("#daylight > span").html(JSON.stringify(data.data.sensors.daytime));
+        console.log(data.data);
       });
       setTimeout(poll, 1000);
     }
@@ -82,7 +85,9 @@ body, button { width: auto; font-size: 48px; }
 </head>
 <body>
 <div id="last_update">last update: <span></span></div>
-<div id="debug">data: <span></span></div>
+<div id="adc">adc: <span></span></div>
+<div id="daylight">daylight: <span></span></div>
+<div id="debug">debug: <span></span></div>
 <button id="setter">toggle garage door</button>
 
 <div class="adc-container">
