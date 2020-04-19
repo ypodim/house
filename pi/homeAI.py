@@ -10,7 +10,7 @@ from sensors.daytime import Daytime
 from sensors.adc import ADC
 from actuators.relays import Relay
 from actuators.rf433 import RFManager
-from jobs.garage import Garage, Doorbell, Lights, Daytime as DaytimeJob
+from jobs.garage import Garage, Doorbell, Lights
 
 define("VMurl", default="http://localhost/data/", help="VM remote url to post data", type=str)
 
@@ -33,7 +33,6 @@ class homeAI(object):
         self.jobs["garage"] = Garage()
         self.jobs["doorbell"] = Doorbell()
         self.jobs["lights"] = Lights()
-        self.jobs["daytime"] = DaytimeJob()
         tornado.ioloop.IOLoop.instance().call_later(0, self.pushDataToVM)
         tornado.ioloop.IOLoop.instance().call_later(0, self.runJobs)
 

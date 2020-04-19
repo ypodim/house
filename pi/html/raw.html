@@ -46,7 +46,7 @@ $( document ).ready(function() {
         $("#adc > span").html(JSON.stringify(sensors.adc));
         $("#garage-light-state").html("isGarageLightOn: "+state.isGarageLightOn);
         $("#garage-door-state").html("isGarageDoorOpen: "+state.isGarageDoorOpen);
-        $("#daylight-state").html("isDaytime: "+state.isDaytime);
+        $("#daylight-state").html("isDaytime: "+sensors.daytime.isDaytime);
       });
       setTimeout(poll, 1000);
     }

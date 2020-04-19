@@ -43,21 +43,31 @@ class Daytime():
             req = urllib.request.Request(url)   
             content = urllib.request.urlopen(req).read()
             data = json.loads(content.decode("ascii"))
-
-            self.dawn_time = self.get_dtime_obj(data["results"]["sunrise"])
-            self.dusk_time = self.get_dtime_obj(data["results"]["sunset"])
-            self.last_update = time.time()
         except:
             if platform.system() != "Linux":
                 print("sun: network down?")
+            return
+
+        self.dawn_time = self.get_dtime_obj(data["results"]["sunrise"])
+        self.dusk_time = self.get_dtime_obj(data["results"]["sunset"])
+        self.last_update = time.time()
+        
 
     def __get__(self, instance, owner):
         if time.time() - self.last_update > 3600:
             self.requestTimes()
         dawn_time = self.dawn_time
         dusk_time = self.dusk_time
-        return dict(dawn_time=dawn_time, dusk_time=dusk_time)
+        
+        now = dt.datetime.now().time()
+        if (now < dawn_time.time() or now > dusk_time.time()):
+            self.isDaytime = False
+        else:
+            self.isDaytime = True
+
+        return dict(dawn_time=dawn_time, dusk_time=dusk_time, isDaytime=self.isDaytime)
 
 if __name__=="__main__":
-    for k,v in getSunData().items():
-        print(k,v)
+    dtime = Daytime()
+    dtime.requestTimes()
+    print(dtime.__get__(None, None))
