@@ -46,10 +46,11 @@ class Store(MutableMapping):
         actions = self.actions
         if clear: self.actions = []
         return actions
-
+    def save(self, data):
+        self.store["data"] = data
     def get(self):
         last_update = "%s" % datetime.datetime.fromtimestamp(self.last_update)
-        return dict(data=self.store, last_update=last_update)
+        return dict(data=self.store["data"], last_update=last_update)
 
     def __keytransform__(self, key):
         return key
@@ -59,8 +60,8 @@ class DataHandler(tornado.web.RequestHandler):
         self.store = store
     def put(self):
         # params = self.request.path.split('/')[2:]
-        sensors = json.loads(self.get_argument("sensors"))
-        self.store["sensors"] = sensors
+        data = json.loads(self.get_argument("datastr"))
+        self.store.save(data)
         self.write(dict(actions=self.store.getActions()))
     def get(self):
         self.write(self.store.get())
@@ -99,7 +100,7 @@ class Application(tornado.web.Application):
         super(Application, self).__init__(handlers, **settings)
 
 async def main(shutdown_event):
-    tornado.options.parse_command_line()
+    # tornado.options.parse_command_line()
     # tornado.log.enable_pretty_logging()
     access_log = logging.getLogger('tornado.access')
     access_log.info("starting up")

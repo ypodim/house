@@ -9,7 +9,8 @@ from tornado.options import define, options
 from sensors.daytime import Daytime
 from sensors.adc import ADC
 from actuators.relays import Relay
-from jobs.garage import Garage, Doorbell
+from actuators.rf433 import RFManager
+from jobs.garage import Garage, Doorbell, Lights
 
 define("VMurl", default="http://localhost/data/", help="VM remote url to post data", type=str)
 
@@ -25,24 +26,27 @@ class homeAI(object):
         self.sensors = Sensors()
         self.actuators = {}
         self.actuators["relay"] = Relay()
+        self.actuators["rf"] = RFManager()
         self.jobs = {}
         self.state = {}
         self.actions = {}
         self.jobs["garage"] = Garage()
         self.jobs["doorbell"] = Doorbell()
+        self.jobs["lights"] = Lights()
         tornado.ioloop.IOLoop.instance().call_later(0, self.pushDataToVM)
         tornado.ioloop.IOLoop.instance().call_later(0, self.runJobs)
 
     def runJobs(self):
         for jname, job in self.jobs.items():
             job.run(self.sensors, self.actuators, self.state, self.actions)
-        tornado.ioloop.IOLoop.instance().call_later(0.2, self.runJobs)
+        tornado.ioloop.IOLoop.instance().call_later(0.05, self.runJobs)
 
     def pushDataToVM(self):
-        data = dict(adc=self.sensors.adc, daytime=self.sensors.daytime)
+        sensors = dict(adc=self.sensors.adc, daytime=self.sensors.daytime)
+        data = dict(sensors=sensors, state=self.state)
         r = None
         try:
-            r = requests.put(options.VMurl, data=dict(sensors=json.dumps(data)))
+            r = requests.put(options.VMurl, data=dict(datastr=json.dumps(data)))
         except:
             print("oops, network problems with {}".format(options.VMurl))
 
@@ -50,10 +54,11 @@ class homeAI(object):
             for i, action in enumerate(json.loads(r.content).get("actions")):
                 self.actions[time.time()] = action
 
-        tornado.ioloop.IOLoop.instance().call_later(1, self.pushDataToVM)
+        tornado.ioloop.IOLoop.instance().call_later(0.1, self.pushDataToVM)
 
 if __name__=="__main__":
     hai = homeAI()
+    print("running")
     tornado.ioloop.IOLoop.current().start()
 
     

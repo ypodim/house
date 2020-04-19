@@ -25,7 +25,6 @@ class Garage(Job):
         for a in list(actions.keys()).copy():
             if actions[a] == "garage.door.toggle":
                 actuators["relay"].toggle()
-                print("open door!")
                 del actions[a]
         
 class Doorbell(Job):
@@ -43,6 +42,20 @@ class Doorbell(Job):
             state["isDoorbellPressed"] = True
         else:
             state["isDoorbellPressed"] = False
+
+
+class Lights(Job):
+    def run(self, sensors, actuators, state, actions):
+        # Process actions
+        for a in list(actions.keys()).copy():
+            if actions[a] == "garage.light.toggle":
+                if "isGarageLightOn" not in state:
+                    state["isGarageLightOn"] = False
+                state["isGarageLightOn"] = not state["isGarageLightOn"]
+
+                newstate = "on" if state["isGarageLightOn"] else "off"
+                actuators["rf"].txCode("0306", "2", newstate)
+                del actions[a]
 
 
 # action: open garage door 

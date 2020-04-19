@@ -2,10 +2,8 @@ import logging
 import time
 
 try:
-    from adc import ADC
     import RPi.GPIO as GPIO 
 except:
-    ADC = None
     GPIO = None
     logging.error("Could not load GPIO. Not running on Rasp?")
 

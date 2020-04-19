@@ -14,13 +14,13 @@ class Plug:
         self.of = outletFamily
         self.btn = btn
         self.codes = codes
-        self.status = None
-    def __repr__(self):
-        return "of:%s btn:%s status:%s" % (self.of, self.btn, self.status)
+        # self.status = None
+    # def __repr__(self):
+    #     return "of:%s btn:%s status:%s" % (self.of, self.btn, self.status)
     def json(self):
         return dict(of=self.of, btn=self.btn, status=self.status)
-    def getStatus(self):
-        return self.status
+    # def getStatus(self):
+    #     return self.status
     def tx(self, plugstate, pin=17):
         if plugstate not in self.codes:
             logging.error("state %s not found: of:%s btn:%s" % (plugstate, self.of, self.btn))
@@ -36,9 +36,8 @@ class Plug:
             except:
                 logging.error("unexpected error: %s" % sys.exc_info()[0])
                 return None
-        self.status = plugstate
+        # self.status = plugstate
         return code
-
 
 class RFManager:
     def __init__(self):
@@ -53,18 +52,18 @@ class RFManager:
             logging.error("plug not found: of:%s btn:%s val:%s" % (outletFamily, btn, val))
             return None
         return res[0]
-    def getPlugStatus(self, outletFamily, btn):
-        plug = self.getPlug(outletFamily, btn)
-        if not plug:
-            return None
-        return plug.getStatus()
+    # def getPlugStatus(self, outletFamily, btn):
+    #     plug = self.getPlug(outletFamily, btn)
+    #     if not plug:
+    #         return None
+    #     return plug.getStatus()
     def txCode(self, outletFamily, btn, val):
         plug = self.getPlug(outletFamily, btn)
         if not plug:
             return None
         return plug.tx(val)
-    def getStatus(self):
-        return [p.json() for p in self.plugs]
+    # def getStatus(self):
+    #     return [p.json() for p in self.plugs]
 
 class RFReceiver(object):
     def __init__(self, pin=27):

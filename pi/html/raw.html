@@ -10,33 +10,24 @@ $( document ).ready(function() {
     ws.onmessage = function (evt) {
         var msg = JSON.parse(evt.data);
         for (let x = 0; x < 8; x++) {
-          $("#adc"+x).html("ir"+x+": "+msg.sensors.adc[x])
+          // $("#adc"+x).html("ir"+x+": "+msg.sensors.adc[x])
         }
 
-        $(".garage1").html(msg.garagedoor.isopen == "1" ? "door open":"door closed");
-        $(".garage1").css("background-color", msg.garagedoor.isopen == "1" ? "red":"green");
-        $(".garage2").html("irval: "+msg.garagedoor.irval);
+        // $(".garage1").html(msg.garagedoor.isopen == "1" ? "door open":"door closed");
+        // $(".garage1").css("background-color", msg.garagedoor.isopen == "1" ? "red":"green");
+        // $(".garage2").html("irval: "+msg.garagedoor.irval);
 
         var daylight = msg.sensors.daylight == "1" ? "daytime" : "nighttime";
         daylight += "<br>for another ";
         daylight += msg.sensors.timeleft
     };
 
-    $("#btn").click(function() {
-      $.ajax({
-        url: "/garagedoor",
-        method: "PUT",
-        data: { value : 1 },
-      }).done(function( html ) {
-        console.log(html);
-      });
-    });
-
-    $("#setter").click(function(){
+    $(".toggle-action").click(function(evt){
+      var action = $(evt.target).attr("action");
       $.ajax({
         url: "/actions",
         method: "PUT",
-        data: { action : "garage.door.toggle" },
+        data: { action : action },
       }).done(function( html ) {
         console.log(html);
       });
@@ -51,8 +42,9 @@ $( document ).ready(function() {
         // $("#debug > span").html(JSON.stringify(data.data));
         $("#last_update > span").html(data.last_update);
         $("#adc > span").html(JSON.stringify(data.data.sensors.adc));
+        $("#state > span").html(JSON.stringify(data.data.state));
         $("#daylight > span").html(JSON.stringify(data.data.sensors.daytime));
-        console.log(data.data);
+        
       });
       setTimeout(poll, 1000);
     }
@@ -64,14 +56,6 @@ body, button { width: auto; font-size: 48px; }
 /*html { margin: 0 auto; }*/
 #btn { cursor: pointer; }
 #btn:hover { background-color: gray; }
-.adc-container {
-  display: grid;
-  grid-gap: 5px;
-  grid-template-columns: repeat(4, auto);
-  grid-template-rows: repeat(2, 220px);
-  grid-auto-flow: row;
-}
-.adc-container div { background-color: #eee; padding: 20px; border-radius: 5px;}
 .container {
   display: grid;
   grid-gap: 5px;
@@ -86,24 +70,11 @@ body, button { width: auto; font-size: 48px; }
 <body>
 <div id="last_update">last update: <span></span></div>
 <div id="adc">adc: <span></span></div>
+<div id="state">state: <span></span></div>
 <div id="daylight">daylight: <span></span></div>
 <div id="debug">debug: <span></span></div>
-<button id="setter">toggle garage door</button>
+<button id="g1" class="toggle-action" action="garage.door.toggle">toggle garage door</button>
+<button id="g2" class="toggle-action" action="garage.light.toggle">toggle garage light</button>
 
-<div class="adc-container">
-    <div class="adc" id="adc0">1</div>
-    <div class="adc" id="adc1">1</div>
-    <div class="adc" id="adc2">1</div>
-    <div class="adc" id="adc3">1</div>
-    <div class="adc" id="adc4">1</div>
-    <div class="adc" id="adc5">1</div>
-    <div class="adc" id="adc6">1</div>
-    <div class="adc" id="adc7">1</div>   
-</div>
-<div class="container">
-    <div class="garage1">1</div>
-    <div class="garage2">2</div>
-    <div class="garage3"><div id="btn">toggle</div></div>
-</div>
 </body>
 </html>
