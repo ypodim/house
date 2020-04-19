@@ -40,11 +40,13 @@ $( document ).ready(function() {
         // data: { value : 1 },
       }).done(function( data ) {
         // $("#debug > span").html(JSON.stringify(data.data));
+        var state = data.data.state;
+        var sensors = data.data.sensors;
         $("#last_update > span").html(data.last_update);
-        $("#adc > span").html(JSON.stringify(data.data.sensors.adc));
-        $("#state > span").html(JSON.stringify(data.data.state));
-        $("#daylight > span").html(JSON.stringify(data.data.sensors.daytime));
-        
+        $("#adc > span").html(JSON.stringify(sensors.adc));
+        $("#garage-light-state").html("isGarageLightOn: "+state.isGarageLightOn);
+        $("#garage-door-state").html("isGarageDoorOpen: "+state.isGarageDoorOpen);
+        $("#daylight-state").html("isDaytime: "+state.isDaytime);
       });
       setTimeout(poll, 1000);
     }
@@ -70,11 +72,10 @@ body, button { width: auto; font-size: 48px; }
 <body>
 <div id="last_update">last update: <span></span></div>
 <div id="adc">adc: <span></span></div>
-<div id="state">state: <span></span></div>
-<div id="daylight">daylight: <span></span></div>
-<div id="debug">debug: <span></span></div>
 <button id="g1" class="toggle-action" action="garage.door.toggle">toggle garage door</button>
 <button id="g2" class="toggle-action" action="garage.light.toggle">toggle garage light</button>
-
+<div id="garage-light-state" class="state"></div>
+<div id="garage-door-state" class="state"></div>
+<div id="daylight-state" class="state"></div>
 </body>
 </html>

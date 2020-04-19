@@ -15,19 +15,19 @@ class Daytime():
         self.last_update = 0
         self.isDaytime = None
 
-    def dayTimeLeft(self):
-        tomorrow = dt.date.today() + dt.timedelta(days=1)
-        next_event = dt.datetime.now()
-        if self.dawn_time != None and self.dusk_time != None:
-            if self.isDaytime:
-                next_event = dt.datetime.combine(tomorrow, self.dusk_time.time())
-            else: 
-                next_event = dt.datetime.combine(tomorrow, self.dawn_time.time())
+    # def dayTimeLeft(self):
+    #     tomorrow = dt.date.today() + dt.timedelta(days=1)
+    #     next_event = dt.datetime.now()
+    #     if self.dawn_time != None and self.dusk_time != None:
+    #         if self.isDaytime:
+    #             next_event = dt.datetime.combine(tomorrow, self.dusk_time.time())
+    #         else: 
+    #             next_event = dt.datetime.combine(tomorrow, self.dawn_time.time())
         
-        timeleft = next_event - dt.datetime.now().replace(microsecond=0)
-        while timeleft > dt.timedelta(days=1):
-            timeleft -= dt.timedelta(days=1)
-        return "%s" % timeleft
+    #     timeleft = next_event - dt.datetime.now().replace(microsecond=0)
+    #     while timeleft > dt.timedelta(days=1):
+    #         timeleft -= dt.timedelta(days=1)
+    #     return "%s" % timeleft
 
     def get_dtime_obj(self, dtstr):
         str_format = "%Y-%m-%dT%H:%M:%S%z"
@@ -54,9 +54,9 @@ class Daytime():
     def __get__(self, instance, owner):
         if time.time() - self.last_update > 3600:
             self.requestTimes()
-        sunrise = "%s" % self.dawn_time
-        sunset = "%s" % self.dusk_time
-        return dict(sunrise=sunrise, sunset=sunset, timeleft=self.dayTimeLeft())
+        dawn_time = self.dawn_time
+        dusk_time = self.dusk_time
+        return dict(dawn_time=dawn_time, dusk_time=dusk_time)
 
 if __name__=="__main__":
     for k,v in getSunData().items():

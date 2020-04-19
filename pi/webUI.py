@@ -16,7 +16,7 @@ define("port", default=80, help="run on the given port", type=int)
 
 class Store(MutableMapping):
     def __init__(self, *args, **kwargs):
-        self.store = dict()
+        self.store = dict(data=None)
         self.last_update = 0
         self.actions = []
         self.update(dict(*args, **kwargs))  # use the free update to set keys

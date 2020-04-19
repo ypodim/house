@@ -1,5 +1,4 @@
-
-
+import datetime as dt
 
 class Job:
     def run(self, sensors, state, actions):
@@ -31,13 +30,6 @@ class Doorbell(Job):
     def run(self, sensors, actuators, state, actions):
         # Process sensors
         doorbell_sensor = sensors.adc[1]
-        # dmax = "doorbell_max"
-        # dmin = "doorbell_min"
-        # if dmax not in state: state[dmax] = 0
-        # if dmin not in state: state[dmin] = 1000
-        # if doorbell_sensor > state[dmax]: state[dmax] = doorbell_sensor
-        # if doorbell_sensor < state[dmin]: state[dmin] = doorbell_sensor
-        # print("doorbell: {}\t- {}".format(state[dmin], state[dmax]))
         if (doorbell_sensor < 450):
             state["isDoorbellPressed"] = True
         else:
@@ -57,11 +49,31 @@ class Lights(Job):
                 actuators["rf"].txCode("0306", "2", newstate)
                 del actions[a]
 
+class Daytime(Job):
+    def dayTimeLeft(self, dawn_time, dusk_time):
+        tomorrow = dt.date.today() + dt.timedelta(days=1)
+        next_event = dt.datetime.now()
+        if dawn_time != None and dusk_time != None:
+            if 1:#isDaytime:
+                next_event = dt.datetime.combine(tomorrow, dusk_time.time())
+            else: 
+                next_event = dt.datetime.combine(tomorrow, dawn_time.time())
+        
+        timeleft = next_event - dt.datetime.now().replace(microsecond=0)
+        while timeleft > dt.timedelta(days=1):
+            timeleft -= dt.timedelta(days=1)
+        return "%s" % timeleft
 
-# action: open garage door 
-# logic: is the garage door open or closed
+    def run(self, sensors, actuators, state, actions):
+        # Process sensors
+        daytimeLeft = self.dayTimeLeft(sensors.daytime.get("dawn_time"), sensors.daytime.get("dusk_time"))
+        if (1 < 450):
+            state["isDaytime"] = True
+        else:
+            state["isDaytime"] = False
+
+
 # logic: is the bell btn pressed
 # action: if bell btn is pressed send message
 # logic: is it day or night
 # action: if daylight changes, toggle light
-# action: toggle rf433 switches
