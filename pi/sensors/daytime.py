@@ -14,20 +14,7 @@ class Daytime():
         self.dusk_time = None
         self.last_update = 0
         self.isDaytime = None
-
-    # def dayTimeLeft(self):
-    #     tomorrow = dt.date.today() + dt.timedelta(days=1)
-    #     next_event = dt.datetime.now()
-    #     if self.dawn_time != None and self.dusk_time != None:
-    #         if self.isDaytime:
-    #             next_event = dt.datetime.combine(tomorrow, self.dusk_time.time())
-    #         else: 
-    #             next_event = dt.datetime.combine(tomorrow, self.dawn_time.time())
-        
-    #     timeleft = next_event - dt.datetime.now().replace(microsecond=0)
-    #     while timeleft > dt.timedelta(days=1):
-    #         timeleft -= dt.timedelta(days=1)
-    #     return "%s" % timeleft
+        self.timeLeft = None
 
     def get_dtime_obj(self, dtstr):
         str_format = "%Y-%m-%dT%H:%M:%S%z"
@@ -48,24 +35,29 @@ class Daytime():
                 print("sun: network down?")
             return
 
-        self.dawn_time = self.get_dtime_obj(data["results"]["sunrise"])
-        self.dusk_time = self.get_dtime_obj(data["results"]["sunset"])
+        self.dawn_time = self.get_dtime_obj(data["results"]["sunrise"]).replace(tzinfo=None).time()
+        self.dusk_time = self.get_dtime_obj(data["results"]["sunset"]).replace(tzinfo=None).time()
         self.last_update = time.time()
         
+    def calcMetadata(self):
+        if self.dawn_time==None or self.dusk_time==None:
+            return
+
+        self.isDaytime = True
+        now = dt.datetime.now()
+        if (now.time() < self.dawn_time or now.time() > self.dusk_time):
+            self.isDaytime = False
+
+        if self.isDaytime:
+            self.timeLeft = dt.datetime.combine(dt.date.today(), self.dusk_time) - now
+        else:
+            self.timeLeft = dt.datetime.combine(dt.date.today(), self.dawn_time) - now
 
     def __get__(self, instance, owner):
         if time.time() - self.last_update > 3600:
             self.requestTimes()
-        dawn_time = self.dawn_time
-        dusk_time = self.dusk_time
-        
-        now = dt.datetime.now().time()
-        if (now < dawn_time.time() or now > dusk_time.time()):
-            self.isDaytime = False
-        else:
-            self.isDaytime = True
-
-        return dict(dawn_time=dawn_time, dusk_time=dusk_time, isDaytime=self.isDaytime)
+        self.calcMetadata()
+        return dict(dawn_time=self.dawn_time, dusk_time=self.dusk_time, isDaytime=self.isDaytime, timeLeft=self.timeLeft)
 
 if __name__=="__main__":
     dtime = Daytime()

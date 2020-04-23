@@ -42,6 +42,9 @@ class Plug:
 class RFManager:
     def __init__(self):
         self.plugs = []
+        import os
+        os.chdir(os.path.dirname(__file__))
+        print(os.getcwd())
         with open("codes.json") as f:
             for plug in json.loads(f.read()).get("plugs"):
                 self.plugs.append(Plug(plug["outletFamily"], plug["btn"], plug["codes"]))

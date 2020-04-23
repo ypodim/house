@@ -25,7 +25,7 @@ class Store(MutableMapping):
         return self.store[self.__keytransform__(key)]
 
     def __setitem__(self, key, value):
-        self.last_update = time.time()
+        self.last_update = datetime.datetime.now()
         self.store[self.__keytransform__(key)] = value
 
     def __delitem__(self, key):
@@ -47,10 +47,9 @@ class Store(MutableMapping):
         if clear: self.actions = []
         return actions
     def save(self, data):
-        self.store["data"] = data
+        self["data"] = data
     def get(self):
-        last_update = "%s" % datetime.datetime.fromtimestamp(self.last_update)
-        return dict(data=self.store["data"], last_update=last_update)
+        return dict(data=self.store["data"], last_update="%s" % self.last_update)
 
     def __keytransform__(self, key):
         return key
