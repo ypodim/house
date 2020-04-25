@@ -1,4 +1,5 @@
 import datetime as dt
+import logging
 import tornado.ioloop
 
 class Job:
@@ -25,6 +26,14 @@ class Garage(Job):
         for a in list(actions.keys()).copy():
             if actions[a] == "garage.door.toggle":
                 actuators["relay"].toggle()
+                del actions[a]
+
+class LutronActions(Job):
+    def run(self, sensors, actuators, state, actions):
+        # Process actions
+        for a in list(actions.keys()).copy():
+            if actions[a] == "kitchen.pendants":
+                actuators["lutron"].toggle(actions[a])
                 del actions[a]
         
 class Doorbell(Job):

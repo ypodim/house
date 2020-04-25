@@ -3,6 +3,7 @@ import urllib.request
 import json
 import time
 import ssl
+from logger import Logger
 
 import platform
 if platform.system() != "Linux":
@@ -15,6 +16,7 @@ class Daytime():
         self.last_update = 0
         self.isDaytime = None
         self.timeLeft = None
+        self.log = Logger(__class__.__name__)
 
     def get_dtime_obj(self, dtstr):
         str_format = "%Y-%m-%dT%H:%M:%S%z"
@@ -32,7 +34,7 @@ class Daytime():
             data = json.loads(content.decode("ascii"))
         except:
             if platform.system() != "Linux":
-                print("sun: network down?")
+                self.log.log("sun: network down?")
             return
 
         self.dawn_time = self.get_dtime_obj(data["results"]["sunrise"]).replace(tzinfo=None).time()

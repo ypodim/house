@@ -10,13 +10,12 @@ except:
 class Relay(object):
     def __init__(self):
         self.gpio = GPIO
-        self.log = logging.getLogger(self.__class__.__name__)
         self.relayPin = 26
         if self.gpio:
             self.gpio.setmode(self.gpio.BCM)
             # self.gpio.setup(self.relayPin, self.gpio.OUT)
         else: 
-            self.log.error("GPIO not found")
+            logging.error("GPIO not found")
 
     def toggle(self):
         print("toggling garage door")
