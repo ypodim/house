@@ -17,7 +17,7 @@ class Plug:
         self.log = Logger(__class__.__name__)
     def json(self):
         return dict(of=self.of, btn=self.btn, status=self.status)
-    def tx(self, plugstate, pin=17):
+    def tx(self, plugstate, pin=3):
         if plugstate not in self.codes:
             self.log.log("state %s not found: of:%s btn:%s" % (plugstate, self.of, self.btn))
             return None
@@ -72,7 +72,34 @@ class RFReceiver(object):
 
 
 if __name__=="__main__":
-    # rf = RFDevice()
-    # print(rf.txCode("0306", "2", sys.argv[1]))
-    rfrecv = RFReceiver()
-    rfrecv.recv()
+    rf = RFManager()
+    print(rf.txCode("0306", "2", sys.argv[1]))
+    # rfrecv = RFReceiver()
+    # rfrecv.recv()
+
+
+
+'''
+#include <RCSwitch.h>
+
+RCSwitch mySwitch = RCSwitch();
+
+void setup() {
+  mySwitch.enableTransmit(10);
+  mySwitch.setPulseLength(180);
+  mySwitch.setRepeatTransmit(5);
+  Serial.begin(9600);
+}
+
+void loop() {
+  digitalWrite(LED_BUILTIN, HIGH);
+//  mySwitch.send(4283651, 24); // 0306-4 on
+//  mySwitch.send(4281795, 24); // 0306-2 on
+  delay(500);
+  
+  digitalWrite(LED_BUILTIN, LOW);
+//  mySwitch.send(4283660, 24); // 0306-4 off
+  mySwitch.send(4281804, 24); // 0306-2 off
+  delay(500);
+}
+'''

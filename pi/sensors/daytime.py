@@ -55,11 +55,17 @@ class Daytime():
         else:
             self.timeLeft = dt.datetime.combine(dt.date.today(), self.dawn_time) - now
 
-    def __get__(self, instance, owner):
-        if time.time() - self.last_update > 3600:
-            self.requestTimes()
-        self.calcMetadata()
-        return dict(dawn_time=self.dawn_time, dusk_time=self.dusk_time, isDaytime=self.isDaytime, timeLeft=self.timeLeft)
+    def __str__(self):
+        return "daytime"
+    def __getattr__(self, attr):
+        if attr == "value":
+            if time.time() - self.last_update > 3600:
+                self.requestTimes()
+            self.calcMetadata()
+            return dict(dawn_time=self.dawn_time, dusk_time=self.dusk_time, isDaytime=self.isDaytime, timeLeft=self.timeLeft)
+        else:
+            return "unknown attr: %s" % attr
+
 
 if __name__=="__main__":
     dtime = Daytime()

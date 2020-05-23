@@ -1,8 +1,11 @@
 import datetime as dt
-import logging
 import tornado.ioloop
+import time
+from logger import Logger
 
 class Job:
+    def __init__(self):
+        self.log = Logger(__class__.__name__)
     def run(self, sensors, state, actions):
         print("%s not implemented" % self.__class__.__name__)
 
@@ -25,15 +28,48 @@ class Garage(Job):
         # Process actions
         for a in list(actions.keys()).copy():
             if actions[a] == "garage.door.toggle":
-                actuators["relay"].toggle()
+                garagePin = 0
+                actuators.relays.garage.set(1)
+                time.sleep(0.1)
+                actuators.relays.garage.set(0)
                 del actions[a]
+
+class Irrigation(Job):
+    def run(self, sensors, actuators, state, actions):
+        if "irrigation" not in state:
+            state["irrigation"] = {}
+            state["irrigation"]["last_start"] = dt.datetime.now()
+            state["irrigation"]["last_end"] = dt.datetime.now()
+
+        irrState = state["irrigation"]
+
+        waterFor = dt.timedelta(minutes=10)
+
+        if actuators.relays.water.isOn():
+            if dt.datetime.now() > irrState["last_start"] + waterFor:
+                actuators.relays.water.set(0)
+                irrState["last_end"] = dt.datetime.now()
+                self.log.log("turning OFF front-lawn water")
+        else:
+            now = dt.datetime.now()
+            if now.hour == 21 and now.minute == 00:
+                actuators.relays.water.set(1)
+                irrState["last_start"] = now
+                self.log.log("turning ON front-lawn water")
+
+        for a in list(actions.keys()).copy():
+            if actions[a].startswith("irrigation"):
+                actuators.relays.water.toggle()
+                del actions[a]
+
+        
 
 class LutronActions(Job):
     def run(self, sensors, actuators, state, actions):
         # Process actions
         for a in list(actions.keys()).copy():
             if actions[a] == "kitchen.pendants":
-                actuators["lutron"].toggle(actions[a])
+                actuators.lutron.toggle(actions[a])
                 del actions[a]
         
 class Doorbell(Job):
@@ -50,48 +86,34 @@ class Lights(Job):
     def toggleGarageLight(self, times=4):
         self.state["isGarageLightOn"] = not self.state["isGarageLightOn"]
         newstate = "on" if self.state["isGarageLightOn"] else "off"
-        self.actuators["rf"].txCode("0306", "2", newstate)
+        self.actuators.rf.txCode("0306", "2", newstate)
+        print("garage light going %s" % newstate)
         if times > 0:
             tornado.ioloop.IOLoop.instance().call_later(0.2, self.toggleGarageLight, times=times-1)
 
+    def toggleRFSwitch(self, rfswitch: str) -> None:
+        _, rffamily, rfid = rfswitch.split('.')
+        self.state[rfswitch] = not self.state[rfswitch]
+        newstate = "on" if self.state[rfswitch] else "off"
+        self.actuators.rf.txCode(rffamily, rfid, newstate)
+        print(rffamily, rfid, newstate)
 
     def run(self, sensors, actuators, state, actions):
         self.state = state
         self.actuators = actuators
         # Process actions
         for a in list(actions.keys()).copy():
-            if actions[a] == "garage.light.toggle":
+            if actions[a].startswith("rf.0306."):
+                if actions[a] not in state:
+                    state[actions[a]] = False
+
+                self.toggleRFSwitch(actions[a])
+                del actions[a]
+
+            elif actions[a] == "garage.light.toggle":
                 if "isGarageLightOn" not in state:
                     state["isGarageLightOn"] = False
 
-                self.toggleGarageLight()
+                self.toggleGarageLight(times=0)
                 del actions[a]
 
-# class Daytime(Job):
-#     def dayTimeLeft(self, dawn_time, dusk_time):
-#         tomorrow = dt.date.today() + dt.timedelta(days=1)
-#         next_event = dt.datetime.now()
-#         if dawn_time != None and dusk_time != None:
-#             if 1:#isDaytime:
-#                 next_event = dt.datetime.combine(tomorrow, dusk_time.time())
-#             else: 
-#                 next_event = dt.datetime.combine(tomorrow, dawn_time.time())
-        
-#         timeleft = next_event - dt.datetime.now().replace(microsecond=0)
-#         while timeleft > dt.timedelta(days=1):
-#             timeleft -= dt.timedelta(days=1)
-#         return "%s" % timeleft
-
-#     def run(self, sensors, actuators, state, actions):
-#         # Process sensors
-#         daytimeLeft = self.dayTimeLeft(sensors.daytime.get("dawn_time"), sensors.daytime.get("dusk_time"))
-#         if (1 < 450):
-#             state["isDaytime"] = True
-#         else:
-#             state["isDaytime"] = False
-
-
-# logic: is the bell btn pressed
-# action: if bell btn is pressed send message
-# logic: is it day or night
-# action: if daylight changes, toggle light

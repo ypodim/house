@@ -10,8 +10,15 @@ class ADC(object):
         adc = self.spi.xfer2([1,(8+channel)<<4,0])
         output = ((adc[1]&3) << 8) + adc[2]
         return output
-    def __get__(self, instance, owner):
-        return list(map(lambda x: self.getValue(x), range(8)))
+    def __str__(self):
+        return "adc"
+    def __getattr__(self, attr):
+        if attr == "value":
+            return list(map(lambda x: self.getValue(x), range(8)))
+        else:
+            return "unknown attr: %s" % attr
+    def __getitem__(self, item):
+        return self.value[item]
 
 if __name__=="__main__":
     from time import sleep

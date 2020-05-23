@@ -34,6 +34,7 @@ class Lutron(asyncio.Protocol):
     def __init__(self, loop):
         self.loop = loop
         self.log = Logger(__class__.__name__)
+        self._state = {}
         self.initialized = False
 
     def connection_made(self, transport):
@@ -47,16 +48,16 @@ class Lutron(asyncio.Protocol):
         elif data.decode() == "password: ":
             self.log.log("sending password")
             self.transport.write(b"integration\r\n")
-        # elif data.decode() == "GNET> ":
         else:
             if not self.initialized:
                 self.initialized = True
                 for deviceid in Configuration.getIDs():
-                    print(deviceid)
+                    # print(deviceid)
                     self.query(deviceid)
                     time.sleep(0.1)
-        # else:
-            self.processData(data.decode())
+
+            # self.processData(data.decode())
+            asyncio.ensure_future(self.processData(data.decode()))
     
     def toggle(self, deviceid):
         value = 0
@@ -68,14 +69,14 @@ class Lutron(asyncio.Protocol):
         data = "?OUTPUT,%s,1\r\n" % (deviceid)
         self.transport.write(data.encode())
 
-    def processData(self, data):
+    async def processData(self, data):
         value = 0
         msgre = re.compile("\~(\S+?),(\S+)\r\n$")
         self._wait_v = ""
 
         mobj = msgre.search(data)
         if not mobj:
-            self.log.log("unknown pattern found: %s" % data)
+            # self.log.log("unknown pattern found: %s" % data)
             return
 
         if(mobj.group(1) == self._wait_v or mobj.group(1) == "ERROR"):
@@ -88,20 +89,24 @@ class Lutron(asyncio.Protocol):
         cmd = mobj.group(2)
         deviceid, b, value = cmd.split(",")
         device = Configuration.get(deviceid)
-        # self.save(deviceid, value)
 
         line = "device:{} value:{}".format(deviceid, value)
         self.log.data(line)
-
-    # def save(self, device, value):
-    #     with open("data/lutron-history.txt", "a") as f:
-    #         line = "{}: device:{} value:{}\n".format(dt.datetime.now(), device, value)
-    #         written = f.write(line)
+        self._state[deviceid] = value
 
     def connection_lost(self, exc):
         self.log.log('The server closed the connection')
         self.log.log('Stop the event loop')
         self.loop.stop()
+
+    def __str__(self):
+        return "lutron"
+    def __getattr__(self, attr):
+        if attr == "value":
+            # await self.processData
+            return "asdf: %s" % attr
+        else:
+            return "unknown attr: %s" % attr
 
 if __name__=="__main__":
     loop = asyncio.get_event_loop()

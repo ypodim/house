@@ -7,6 +7,9 @@ class Logger:
     def data(self, msg):
         self.log(msg, "%s-data"%self.name)
 
+    def action(self, msg):
+        self.log(msg, "%s-action"%self.name)
+
     def log(self, msg, name=""):
         datefmt='%m-%d-%Y %H:%M:%S'
         filename = "data/example.log"
