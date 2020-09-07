@@ -1,6 +1,7 @@
 import json
 import sys
 import time
+import os
 from collections import defaultdict
 from logger import Logger
 try:
@@ -17,7 +18,7 @@ class Plug:
         self.log = Logger(__class__.__name__)
     def json(self):
         return dict(of=self.of, btn=self.btn, status=self.status)
-    def tx(self, plugstate, pin=3):
+    def tx(self, plugstate, pin=2):
         if plugstate not in self.codes:
             self.log.log("state %s not found: of:%s btn:%s" % (plugstate, self.of, self.btn))
             return None
@@ -35,9 +36,9 @@ class Plug:
         return code
 
 class RFManager:
-    def __init__(self):
+    def __init__(self, data_path):
         self.plugs = []
-        with open("data/codes.json") as f:
+        with open("%s/codes.json" % data_path) as f:
             for plug in json.loads(f.read()).get("plugs"):
                 self.plugs.append(Plug(plug["outletFamily"], plug["btn"], plug["codes"]))
         self.log = Logger(__class__.__name__)
@@ -55,7 +56,7 @@ class RFManager:
         return plug.tx(val)
 
 class RFReceiver(object):
-    def __init__(self, pin=27):
+    def __init__(self, pin=3):
         self.rfdevice = RFDevice(pin)
         self.rfdevice.enable_rx()
     def recv(self):
@@ -72,10 +73,10 @@ class RFReceiver(object):
 
 
 if __name__=="__main__":
-    rf = RFManager()
-    print(rf.txCode("0306", "2", sys.argv[1]))
-    # rfrecv = RFReceiver()
-    # rfrecv.recv()
+    # rf = RFManager()
+    # print(rf.txCode("0306", "2", sys.argv[1]))
+    rfrecv = RFReceiver()
+    rfrecv.recv()
 
 
 

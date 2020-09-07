@@ -43,11 +43,12 @@ $( document ).ready(function() {
         var state = data.data.state;
         var sensors = data.data.sensors;
         $("#last_update > span").html(data.last_update);
-        $("#adc > span").html(JSON.stringify(sensors.adc));
+        $("#adc > span").html(JSON.stringify(sensors.arduinoserial.adc));
         $("#garage-light-state").html("isGarageLightOn: "+state.isGarageLightOn);
         $("#garage-door-state").html("isGarageDoorOpen: "+state.isGarageDoorOpen);
         $("#daylight-state").html("isDaytime: "+sensors.daytime.isDaytime);
         $("#daylight-timeLeft").html("dayTime timeLeft: "+sensors.daytime.timeLeft);
+        $("#arduinoSerial").html("relays: "+JSON.stringify(sensors.arduinoserial.relays));
       });
       setTimeout(poll, 1000);
     }
@@ -56,9 +57,8 @@ $( document ).ready(function() {
 </script>
 <style>
 body, button { width: auto; font-size: 48px; }
-/*html { margin: 0 auto; }*/
-#btn { cursor: pointer; }
-#btn:hover { background-color: gray; }
+html { margin: 0 auto; }
+button { width: 200px; height: 200px; display: inline-flex;}
 .container {
   display: grid;
   grid-gap: 5px;
@@ -73,14 +73,24 @@ body, button { width: auto; font-size: 48px; }
 <body>
 <div id="last_update">last update: <span></span></div>
 <div id="adc">adc: <span></span></div>
-<button id="g1" class="toggle-action" action="garage.door.toggle">toggle garage door</button>
-<button id="g2" class="toggle-action" action="garage.light.toggle">toggle garage light</button>
-<button id="g3" class="toggle-action" action="kitchen.pendants">kitchen pendants</button>
-<button id="g4" class="toggle-action" action="rf.0306.1">toggle rf 0306.1</button>
-<button id="g5" class="toggle-action" action="irrigation.1">toggle irrigation</button>
+<div>
+  <button id="g1" class="toggle-action" action="garage.door.toggle">toggle garage door</button>
+  <button id="g2" class="toggle-action" action="garage.light.toggle">toggle garage light</button>
+  <button id="g3" class="toggle-action" action="lutron.7">kitchen pendants</button>
+  <button id="g4" class="toggle-action" action="rf.0306.1">toggle rf 0306.1</button>
+  <button id="g5" class="toggle-action" action="irrigation.1">toggle irrigation</button>
+  <button id="g5" class="toggle-action" action="relay.0">test relay 0</button>
+  <button id="g5" class="toggle-action" action="relay.1">test relay 1</button>
+  <button id="g5" class="toggle-action" action="relay.2">test relay 2</button>
+  <button id="g5" class="toggle-action" action="relay.3">test relay 3</button>
+  <button id="g5" class="toggle-action" action="relay.4">test relay 4</button>
+  <button id="g5" class="toggle-action" action="relay.5">test relay 5</button>
+  <button id="g5" class="toggle-action" action="relay.6">test relay 6</button>
+</div>
 <div id="garage-light-state" class="state"></div>
 <div id="garage-door-state" class="state"></div>
 <div id="daylight-state" class="state"></div>
 <div id="daylight-timeLeft" class="state"></div>
+<div id="arduinoSerial" class="state"></div>
 </body>
 </html>

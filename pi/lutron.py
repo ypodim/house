@@ -37,6 +37,13 @@ class Lutron(asyncio.Protocol):
         self._state = {}
         self.initialized = False
 
+    def initState(self, confIndex=0):
+        allIds = Configuration.getIDs()
+        if confIndex < len(allIds):
+            deviceid = allIds[confIndex]
+            self.query(deviceid)
+            self.loop.call_later(0.1, self.initState, confIndex+1)
+
     def connection_made(self, transport):
         self.log.log("connection established")
         self.transport = transport
@@ -50,20 +57,26 @@ class Lutron(asyncio.Protocol):
             self.transport.write(b"integration\r\n")
         else:
             if not self.initialized:
+                self.initState()
                 self.initialized = True
-                for deviceid in Configuration.getIDs():
-                    # print(deviceid)
-                    self.query(deviceid)
-                    time.sleep(0.1)
 
-            # self.processData(data.decode())
             asyncio.ensure_future(self.processData(data.decode()))
     
-    def toggle(self, deviceid):
-        value = 0
-        deviceid = 4
+    def set(self, deviceid, value):
         data = "#OUTPUT,%s,1,%s\r\n" % (deviceid, value)
         self.transport.write(data.encode())
+
+    def get(self, deviceid):
+        return self._state.get(deviceid, None)
+
+    def toggle(self, deviceid):
+        if deviceid in self._state:
+            if self._state[deviceid] == 0:
+                self.set(deviceid, 100)
+            else: 
+                self.set(deviceid, 0)
+        else:
+            self.query(deviceid)
 
     def query(self, deviceid):
         data = "?OUTPUT,%s,1\r\n" % (deviceid)
@@ -72,18 +85,18 @@ class Lutron(asyncio.Protocol):
     async def processData(self, data):
         value = 0
         msgre = re.compile("\~(\S+?),(\S+)\r\n$")
-        self._wait_v = ""
+        # self._wait_v = ""
 
         mobj = msgre.search(data)
         if not mobj:
             # self.log.log("unknown pattern found: %s" % data)
             return
 
-        if(mobj.group(1) == self._wait_v or mobj.group(1) == "ERROR"):
-            self._return_data = []
-            self._return_data.append(mobj.group(1))
-            self._return_data.append(mobj.group(2).split(","))
-            self._wait_v = ""
+        # if(mobj.group(1) == self._wait_v or mobj.group(1) == "ERROR"):
+        #     self._return_data = []
+        #     self._return_data.append(mobj.group(1))
+        #     self._return_data.append(mobj.group(2).split(","))
+        #     self._wait_v = ""
         
         cmdtype = mobj.group(1)
         cmd = mobj.group(2)
@@ -92,7 +105,7 @@ class Lutron(asyncio.Protocol):
 
         line = "device:{} value:{}".format(deviceid, value)
         self.log.data(line)
-        self._state[deviceid] = value
+        self._state[deviceid] = float(value)
 
     def connection_lost(self, exc):
         self.log.log('The server closed the connection')
