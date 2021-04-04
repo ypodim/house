@@ -5,7 +5,8 @@ date:   2021-04-03 00:38:50 -0800
 categories: jekyll update
 ---
 
-
+<div id="fb-root"></div>
+<script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v10.0&appId=175782962471804&autoLogAppEvents=1" nonce="Wr4Bf0q5"></script>
 
 
 
@@ -34,6 +35,7 @@ Here are some profile pictures:
 
 <iframe width="560" height="315" src="https://www.youtube.com/embed/Z4mKSe-kbHI" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
 
+<div class="fb-comments" data-href="https://polychronis.gr/jekyll/update/2021/04/03/canon-printer.html" data-width="" data-numposts="5"></div>
 
 [static-content]: https://pages.github.com/
 [VM]: https://www.a2hosting.com/
