@@ -9,7 +9,7 @@ import time
 
 from sensors.daytime import Daytime
 from sensors.adc import ADC
-from actuators.relays import Relays
+# from actuators.relays import Relays
 from actuators.rf433 import RFManager
 from jobs.jobs import Garage, Doorbell, Lights, LutronActions, Irrigation, StreatNumberSign
 from lutron import Lutron
@@ -55,8 +55,8 @@ class homeAI(object):
         self.sensors.addSensor(self.lutron)
         self.sensors.addSensor(ars)
         self.actuators = Actuators()
-        self.actuators.relays = Relays()
-        self.actuators.rf = RFManager(data_path)
+        # self.actuators.relays = Relays()
+        # self.actuators.rf = RFManager(data_path)
         self.actuators.lutron = self.lutron
         self.actuators.arduserial = ars
         self.jobs = {}
@@ -72,8 +72,8 @@ class homeAI(object):
 
         loop.call_later(0, self.pushDataToVM)
         loop.call_later(0, self.runJobs)
-        coro = loop.create_connection(lambda: self.lutron, '192.168.1.58', 23)
-        loop.run_until_complete(coro)
+#         coro = loop.create_connection(lambda: self.lutron, '192.168.1.58', 23)
+#         loop.run_until_complete(coro)
         loop.add_reader(ars.s, ars.reader)
         loop.call_soon(ars.poll)
 
@@ -100,7 +100,7 @@ class homeAI(object):
 if __name__=="__main__":
     # import sys
     # if (len(sys.argv) > 1):
-    time.sleep(10) # wait for network to come up while booting
+    # time.sleep(10) # wait for network to come up while booting
         
     loop = asyncio.get_event_loop()
     hai = homeAI(loop)

@@ -39,4 +39,7 @@ if __name__=="__main__":
     import RPi.GPIO as GPIO
     import sys
 
-
+    r = Relays()
+    print(r.water2.isOn())
+    r.water2.toggle()
+    print(r.water2.isOn())

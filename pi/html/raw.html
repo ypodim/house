@@ -44,6 +44,7 @@ $( document ).ready(function() {
         var sensors = data.data.sensors;
         $("#last_update > span").html(data.last_update);
         $("#adc > span").html(JSON.stringify(sensors.arduinoserial.adc));
+        $("#irrigation-setup").html("irrigation times: "+state.irrigation.times);
         $("#garage-light-state").html("isGarageLightOn: "+state.isGarageLightOn);
         $("#garage-door-state").html("isGarageDoorOpen: "+state.isGarageDoorOpen);
         $("#daylight-state").html("isDaytime: "+sensors.daytime.isDaytime);
@@ -87,6 +88,7 @@ button { width: 200px; height: 200px; display: inline-flex;}
   <button id="g5" class="toggle-action" action="relay.5">test relay 5</button>
   <button id="g5" class="toggle-action" action="relay.6">test relay 6</button>
 </div>
+<div id="irrigation-setup" class="state"></div>
 <div id="garage-light-state" class="state"></div>
 <div id="garage-door-state" class="state"></div>
 <div id="daylight-state" class="state"></div>

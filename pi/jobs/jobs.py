@@ -93,7 +93,7 @@ class Irrigation(Job):
         # self.times = [5, 7, 14, 4, 11, 5]
         # self.times = [3,3,7,3,7,2]
         # self.times = [4,6,6,1,10,6]
-        startAt = dt.time(hour=18, minute=30)
+        startAt = dt.time(hour=19, minute=15)
 
         state["irrigation"] = {}
         irs = state["irrigation"]
